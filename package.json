@@ -1,0 +1,24 @@
+{
+  "name": "smart-student-hostel-management-system",
+  "version": "1.0.0",
+  "description": "Full-stack Smart Student Hostel Management System with Ticket-Booking Room Allocation and Warden Attendance System",
+  "main": "server/server.js",
+  "scripts": {
+    "start": "node server/server.js",
+    "server": "node server/server.js",
+    "client": "npm --prefix client start",
+    "build": "npm --prefix client install && npm --prefix client run build && npm --prefix server install",
+    "dev": "concurrently \"npm run server\" \"npm run client\""
+  },
+  "keywords": [
+    "hostel",
+    "management",
+    "react",
+    "express",
+    "mongodb",
+    "ticket-booking",
+    "deployment"
+  ],
+  "author": "Antigravity AI",
+  "license": "MIT"
+}
