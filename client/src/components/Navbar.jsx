@@ -13,12 +13,15 @@ import {
   Bed,
   Calendar,
   FileText,
-  AlertCircle
+  AlertCircle,
+  LogIn
 } from 'lucide-react';
+import AuthModal from './AuthModal';
 
 export default function Navbar({ activePage, setActivePage, activeRole, setActiveRole, darkMode, setDarkMode, user }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const [authModalOpen, setAuthModalOpen] = useState(false);
 
   const notifications = [
     { id: 1, text: "Curfew reminder: Gates close at 10:00 PM", time: "10m ago", icon: AlertCircle, color: "text-amber-400" },
@@ -150,6 +153,15 @@ export default function Navbar({ activePage, setActivePage, activeRole, setActiv
               )}
             </div>
 
+            {/* Sign In / Register Button */}
+            <button
+              onClick={() => setAuthModalOpen(true)}
+              className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-extrabold text-xs shadow-lg shadow-blue-600/30 transition-all hover:scale-105"
+            >
+              <LogIn className="w-4 h-4" />
+              <span>Sign In</span>
+            </button>
+
             {/* Dark Mode Toggle */}
             <button 
               onClick={() => setDarkMode(!darkMode)}
@@ -158,6 +170,17 @@ export default function Navbar({ activePage, setActivePage, activeRole, setActiv
               {darkMode ? <Sun className="w-5 h-5 text-amber-400" /> : <Moon className="w-5 h-5 text-indigo-400" />}
             </button>
           </div>
+
+          {/* Auth Modal Render */}
+          <AuthModal 
+            isOpen={authModalOpen} 
+            onClose={() => setAuthModalOpen(false)} 
+            initialRole={activeRole}
+            onLoginSuccess={(role) => {
+              setActiveRole(role);
+              setActivePage(`${role.toLowerCase()}-dashboard`);
+            }} 
+          />
 
           {/* Mobile Hamburger Menu Toggle */}
           <div className="flex md:hidden items-center gap-2">
