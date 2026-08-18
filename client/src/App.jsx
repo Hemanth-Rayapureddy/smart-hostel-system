@@ -53,19 +53,6 @@ const initialRooms = [
       { id: "A-204-BedB", name: "Bed B (Study Alcove)", isOccupied: true, studentId: "u-student-1", studentName: "Alex Johnson" },
       { id: "A-204-BedC", name: "Bed C (Available)", isOccupied: false, studentId: null, studentName: null }
     ]
-  },
-  {
-    id: "rm-205",
-    roomNo: "A-205",
-    floor: 2,
-    block: "Block A - Blue Crest",
-    type: "2-Sharing AC",
-    pricePerSemester: "$1,200",
-    amenities: ["AC", "Attached Bath", "Study Table", "WiFi"],
-    beds: [
-      { id: "A-205-BedA", name: "Bed A", isOccupied: false, studentId: null, studentName: null },
-      { id: "A-205-BedB", name: "Bed B", isOccupied: false, studentId: null, studentName: null }
-    ]
   }
 ];
 
@@ -106,163 +93,119 @@ const initialUsers = [
     guardianPhone: "+1 (555) 018-9900",
     feeStatus: "Paid",
     attendancePercentage: 94
+  }
+];
+
+const initialTimings = [
+  { id: "t-1", category: "Hostel Entry Curfew", time: "10:00 PM Daily", detail: "Main gate locks strictly. Late arrival requires pre-approved Warden pass.", status: "Strict" },
+  { id: "t-2", category: "Breakfast Service", time: "07:30 AM - 09:30 AM", detail: "Dining Hall 1 & 2. Hot fresh breakfast & tea/coffee counter.", status: "Mess Schedule" },
+  { id: "t-3", category: "Lunch Service", time: "12:30 PM - 02:30 PM", detail: "Full meal menu with salad bar and dessert.", status: "Mess Schedule" },
+  { id: "t-4", category: "Evening Tea & Snacks", time: "05:00 PM - 06:30 PM", detail: "Crispy snacks, sandwiches, hot tea & coffee.", status: "Mess Schedule" },
+  { id: "t-5", category: "Dinner Service", time: "07:30 PM - 09:30 PM", detail: "Dinner buffet with roti, rice, paneer/chicken curries.", status: "Mess Schedule" },
+  { id: "t-6", category: "Quiet Study Hours", time: "10:30 PM - 06:00 AM", detail: "Library & floor corridor silence policy for peaceful study.", status: "Daily Policy" },
+  { id: "t-7", category: "Visitor Lounge Hours", time: "09:00 AM - 06:00 PM", detail: "Parents & registered guests permitted in ground floor lounge.", status: "Security" },
+  { id: "t-8", category: "Gym & Sports Complex", time: "06:00 AM - 09:00 PM", detail: "Fitness equipment, badminton courts & indoor games.", status: "Recreation" }
+];
+
+const initialMessMenu = [
+  {
+    day: "Monday",
+    breakfast: "Puri Bhaji, Oats Porridge, Boiled Eggs, Fresh Fruits, Tea/Coffee",
+    lunch: "Rajma Masala, Steamed Basmati Rice, Butter Roti, Cucumber Salad, Curd",
+    snacks: "Samosa with Mint Chutney, Masala Tea, Coffee",
+    dinner: "Kadai Paneer / Chicken Curry, Dal Tadka, Jeera Rice, Chapati, Gulab Jamun",
+    specialTag: "Chef Special North Indian Thali"
   },
   {
-    id: "u-student-2",
-    name: "Sophia Martinez",
-    email: "sophia.m@student.edu",
-    role: "Student",
-    rollNo: "EC-2024-019",
-    course: "B.Tech Electronics (2nd Year)",
-    phone: "+1 (555) 017-3322",
-    avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=250",
-    roomNo: "A-204",
-    bedNo: "Bed A",
-    block: "Block A - Blue Crest",
-    guardianName: "Carlos Martinez",
-    guardianPhone: "+1 (555) 017-4488",
-    feeStatus: "Paid",
-    attendancePercentage: 98
+    day: "Tuesday",
+    breakfast: "Idli Sambhar, Coconut Chutney, Cornflakes with Milk, Coffee",
+    lunch: "Chole Bhature, Veg Pulao, Boondi Raita, Onion Salad",
+    snacks: "Veg Cheese Sandwich, Cold Coffee",
+    dinner: "Mix Veg Handi, Dal Makhani, Phulka, Steamed Rice, Fruit Custard",
+    specialTag: "South Indian Special Breakfast"
   },
   {
-    id: "u-student-3",
-    name: "Liam O'Connor",
-    email: "liam.o@student.edu",
-    role: "Student",
-    rollNo: "ME-2024-088",
-    course: "B.Tech Mechanical (4th Year)",
-    phone: "+1 (555) 016-5544",
-    avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=250",
-    roomNo: "B-102",
-    bedNo: "Bed A",
-    block: "Block B - Emerald Hall",
-    guardianName: "Patrick O'Connor",
-    guardianPhone: "+1 (555) 016-1122",
-    feeStatus: "Due",
-    attendancePercentage: 88
-  }
-];
-
-const initialLeaves = [
-  {
-    id: "l-101",
-    studentId: "u-student-1",
-    studentName: "Alex Johnson",
-    roomNo: "A-204",
-    reason: "Attending National AI hackathon at Tech Summit City",
-    startDate: "2026-07-28",
-    endDate: "2026-07-31",
-    destination: "San Francisco, CA",
-    status: "Approved",
-    appliedOn: "2026-07-20",
-    approvedBy: "Prof. Marcus Brody"
+    day: "Wednesday",
+    breakfast: "Aloo Paratha with White Butter, Curd, Sprouts, Hot Tea",
+    lunch: "Kadhi Pakoda, Steam Rice, Bhindi Fry, Chapati, Roasted Papad",
+    snacks: "Pav Bhaji, Lemonade",
+    dinner: "Paneer Butter Masala / Butter Chicken, Garlic Naan, Veg Biryani, Ice Cream",
+    specialTag: "Special Feast Dinner"
   },
   {
-    id: "l-102",
-    studentId: "u-student-3",
-    studentName: "Liam O'Connor",
-    roomNo: "B-102",
-    reason: "Family emergency visit to hometown",
-    startDate: "2026-07-24",
-    endDate: "2026-07-26",
-    destination: "Chicago, IL",
-    status: "Approved",
-    appliedOn: "2026-07-22",
-    approvedBy: "Sarah Jenkins"
-  }
-];
-
-const initialComplaints = [
-  {
-    id: "c-301",
-    studentId: "u-student-1",
-    studentName: "Alex Johnson",
-    roomNo: "A-204",
-    category: "Maintenance",
-    title: "AC cooling issue in Room A-204",
-    description: "The AC unit is blowing ambient air and making a low humming noise. Requesting technician check.",
-    priority: "Medium",
-    status: "In Progress",
-    createdAt: "2026-07-23",
-    resolution: "Technician assigned for maintenance."
-  }
-];
-
-const initialVisitors = [
-  {
-    id: "v-501",
-    studentId: "u-student-1",
-    studentName: "Alex Johnson",
-    visitorName: "Richard Johnson",
-    relation: "Father",
-    contact: "+1 (555) 018-9900",
-    purpose: "Delivering luggage & textbook supplies",
-    visitDate: "2026-07-25",
-    timeSlot: "02:00 PM - 05:00 PM",
-    status: "Approved",
-    approvedBy: "Prof. Marcus Brody"
-  }
-];
-
-const initialFees = [
-  {
-    id: "f-101",
-    studentId: "u-student-1",
-    studentName: "Alex Johnson",
-    roomNo: "A-204",
-    academicYear: "2026-2027 (Fall Semester)",
-    roomRent: 1350,
-    messCharges: 450,
-    utilityDeposit: 150,
-    totalAmount: 1950,
-    paidAmount: 1950,
-    status: "Paid",
-    dueDate: "2026-08-10",
-    paymentDate: "2026-07-10",
-    transactionId: "TXN-8829104-X"
+    day: "Thursday",
+    breakfast: "Masala Dosa, Tomato Chutney, Medu Vada, Filter Coffee",
+    lunch: "Dal Fry, Jeera Aloo, Peas Pulao, Roti, Salad",
+    snacks: "Bhel Puri / Sev Puri, Ginger Tea",
+    dinner: "Malai Kofta, Dal Panchmel, Butter Roti, Basmati Rice, Kheer",
+    specialTag: "Comfort Food Menu"
   },
   {
-    id: "f-102",
-    studentId: "u-student-3",
-    studentName: "Liam O'Connor",
-    roomNo: "B-102",
-    academicYear: "2026-2027 (Fall Semester)",
-    roomRent: 900,
-    messCharges: 450,
-    utilityDeposit: 150,
-    totalAmount: 1500,
-    paidAmount: 0,
-    status: "Due",
-    dueDate: "2026-08-10",
-    paymentDate: null,
-    transactionId: null
-  }
-];
-
-const initialNotices = [
-  {
-    id: "n-1",
-    title: "Hostel Entry Curfew & Gate Timing Reminder",
-    category: "Announcement",
-    content: "All hostel residents are advised that the main entrance gates will strictly close at 10:00 PM daily. Late entry requires warden approval.",
-    author: "Dr. Robert Vance (Admin)",
-    date: "2026-07-22",
-    pinned: true
+    day: "Friday",
+    breakfast: "Poha with Roasted Peanuts, Veg Cutlet, Omelette, Tea",
+    lunch: "Veg Hyderabadi Biryani / Chicken Biryani, Mirchi Ka Salan, Raita",
+    snacks: "French Fries with Dip, Hot Chocolate",
+    dinner: "Paneer Tikka Masala, Dal Makhani, Tandoori Roti, Veg Pulao, Rasgulla",
+    specialTag: "Biryani Special Friday"
   },
   {
-    id: "n-2",
-    title: "Annual Sports & Cultural Festival Registration",
-    category: "Events",
-    content: "Registration for inter-hostel football, chess, and robotics tournaments is now open until July 30th.",
-    author: "Prof. Marcus Brody (Warden)",
-    date: "2026-07-21",
-    pinned: false
+    day: "Saturday",
+    breakfast: "Uttapam with Sambhar, Upma, Fresh Orange Juice, Tea",
+    lunch: "Aloo Gobi, Chana Dal, Rice, Chapati, Green Salad",
+    snacks: "Bread Pakora, Hot Coffee",
+    dinner: "Shahi Paneer, Dal Tadka, Missi Roti, Steamed Rice, Moong Dal Halwa",
+    specialTag: "Traditional Thali"
+  },
+  {
+    day: "Sunday",
+    breakfast: "Chole Puri, Sweet Lassi, Boiled Eggs, Fruits",
+    lunch: "Special Dum Biryani (Veg/Non-Veg), Paneer Pasanda, Garlic Naan, Sweet Paan",
+    snacks: "Samosa Chaat, Milkshake",
+    dinner: "Hakha Noodles, Manchurian, Fried Rice, Ice Cream Sundae",
+    specialTag: "Sunday Fiesta Special"
   }
 ];
 
-const initialRules = [
-  { id: "r-1", title: "Quiet Hours Policy", detail: "Strict silence in study blocks from 10:30 PM to 6:00 AM." },
-  { id: "r-2", title: "Visitor Guidelines", detail: "External guests allowed only in common lounge between 9:00 AM and 6:00 PM." }
+const initialActivities = [
+  {
+    id: "act-1",
+    title: "Inter-Hostel Chess Championship 2026",
+    category: "Sports & Gaming",
+    date: "2026-08-25",
+    time: "04:00 PM - 08:00 PM",
+    venue: "Block A Common Recreation Lounge",
+    organizer: "Hostel Sports Council",
+    description: "Speed chess tournament with trophies & cash prizes for top 3 grandmasters.",
+    maxSlots: 32,
+    registeredCount: 21,
+    image: "https://images.unsplash.com/photo-1529699211952-734e80c4d42b?auto=format&fit=crop&q=80&w=400"
+  },
+  {
+    id: "act-2",
+    title: "Annual Cultural Music & Open Mic Night",
+    category: "Cultural & Arts",
+    date: "2026-08-30",
+    time: "06:30 PM - 09:30 PM",
+    venue: "Central Amphitheatre Grounds",
+    organizer: "Student Cultural Committee",
+    description: "Live acoustic performances, poetry reading, stand-up comedy, and band acts.",
+    maxSlots: 100,
+    registeredCount: 64,
+    image: "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&q=80&w=400"
+  },
+  {
+    id: "act-3",
+    title: "Robotics & AI Innovation Hackathon",
+    category: "Technical & Tech",
+    date: "2026-09-05",
+    time: "09:00 AM - 06:00 PM",
+    venue: "Smart Innovation Lab Floor 3",
+    organizer: "Hostel IT & Tech Society",
+    description: "24-hour prototype build challenge. IoT smart room projects & automation.",
+    maxSlots: 50,
+    registeredCount: 38,
+    image: "https://images.unsplash.com/photo-1485827404703-89b55fcc595e?auto=format&fit=crop&q=80&w=400"
+  }
 ];
 
 export default function App() {
@@ -273,12 +216,45 @@ export default function App() {
   // Application Data States
   const [users, setUsers] = useState(initialUsers);
   const [rooms, setRooms] = useState(initialRooms);
-  const [leaves, setLeaves] = useState(initialLeaves);
-  const [complaints, setComplaints] = useState(initialComplaints);
-  const [visitors, setVisitors] = useState(initialVisitors);
-  const [fees, setFees] = useState(initialFees);
-  const [notices, setNotices] = useState(initialNotices);
-  const [rules, setRules] = useState(initialRules);
+  const [timings, setTimings] = useState(initialTimings);
+  const [messMenu, setMessMenu] = useState(initialMessMenu);
+  const [activities, setActivities] = useState(initialActivities);
+
+  const [leaves, setLeaves] = useState([]);
+  const [complaints, setComplaints] = useState([]);
+  const [visitors, setVisitors] = useState([]);
+  const [fees, setFees] = useState([
+    {
+      id: "f-101",
+      studentId: "u-student-1",
+      studentName: "Alex Johnson",
+      roomNo: "A-204",
+      academicYear: "2026-2027 (Fall Semester)",
+      roomRent: 1350,
+      messCharges: 450,
+      utilityDeposit: 150,
+      totalAmount: 1950,
+      paidAmount: 1950,
+      status: "Paid",
+      dueDate: "2026-08-10",
+      paymentDate: "2026-08-01",
+      transactionId: "TXN-8829104-X"
+    }
+  ]);
+  const [notices, setNotices] = useState([
+    {
+      id: "n-1",
+      title: "Hostel Entry Curfew & Gate Timing Reminder",
+      category: "Announcement",
+      content: "All hostel residents are advised that main entrance gates close strictly at 10:00 PM daily. Late entry requires warden clearance.",
+      author: "Dr. Robert Vance (Admin)",
+      date: "2026-08-15",
+      pinned: true
+    }
+  ]);
+  const [rules, setRules] = useState([
+    { id: "r-1", title: "Quiet Hours Policy", detail: "Strict silence in study blocks from 10:30 PM to 6:00 AM." }
+  ]);
 
   // Handle Dark mode class
   useEffect(() => {
@@ -296,13 +272,23 @@ export default function App() {
       .then(data => { if (Array.isArray(data) && data.length) setRooms(data); })
       .catch(() => {});
 
-    fetch('/api/users')
+    fetch('/api/timings')
       .then(res => res.json())
-      .then(data => { if (Array.isArray(data) && data.length) setUsers(data); })
+      .then(data => { if (Array.isArray(data) && data.length) setTimings(data); })
+      .catch(() => {});
+
+    fetch('/api/mess-menu')
+      .then(res => res.json())
+      .then(data => { if (Array.isArray(data) && data.length) setMessMenu(data); })
+      .catch(() => {});
+
+    fetch('/api/activities')
+      .then(res => res.json())
+      .then(data => { if (Array.isArray(data) && data.length) setActivities(data); })
       .catch(() => {});
   }, []);
 
-  // Handlers for Stateful Actions & Ticket Room Allocations
+  // Handlers
   const handleAllocateBed = (roomId, bedId, studentId, studentName) => {
     setRooms(prevRooms => prevRooms.map(rm => {
       if (rm.id === roomId || rm.roomNo === roomId) {
@@ -313,24 +299,18 @@ export default function App() {
       }
       return rm;
     }));
+  };
 
-    setUsers(prev => prev.map(u => {
-      if (u.id === studentId || u.name === studentName) {
-        const matchedRoom = rooms.find(r => r.id === roomId || r.roomNo === roomId);
-        const matchedBed = matchedRoom?.beds.find(b => b.id === bedId);
-        return {
-          ...u,
-          roomNo: matchedRoom?.roomNo || 'A-204',
-          bedNo: matchedBed?.name || 'Bed C',
-          block: matchedRoom?.block || 'Block A - Blue Crest'
-        };
+  const handleRegisterActivity = (activityId, studentId, studentName) => {
+    setActivities(prev => prev.map(a => {
+      if (a.id === activityId && a.registeredCount < a.maxSlots) {
+        return { ...a, registeredCount: a.registeredCount + 1 };
       }
-      return u;
+      return a;
     }));
   };
 
   const handleSaveAttendance = (records, markedBy, date) => {
-    // API call or local update
     fetch('/api/attendance/mark', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -451,7 +431,11 @@ export default function App() {
             setActivePage={setActivePage} 
             setActiveRole={setActiveRole} 
             roomsData={rooms} 
-            onAllocateBed={handleAllocateBed} 
+            timingsData={timings}
+            messMenuData={messMenu}
+            activitiesData={activities}
+            onAllocateBed={handleAllocateBed}
+            onRegisterActivity={handleRegisterActivity}
           />
         )}
 
@@ -468,11 +452,15 @@ export default function App() {
             fees={fees}
             notices={notices}
             roomsData={rooms}
+            timingsData={timings}
+            messMenuData={messMenu}
+            activitiesData={activities}
             onApplyLeave={handleApplyLeave}
             onSubmitComplaint={handleSubmitComplaint}
             onRequestVisitor={handleRequestVisitor}
             onPayFee={handlePayFee}
             onAllocateBed={handleAllocateBed}
+            onRegisterActivity={handleRegisterActivity}
           />
         )}
 

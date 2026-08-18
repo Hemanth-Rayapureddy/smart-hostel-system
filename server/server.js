@@ -34,6 +34,55 @@ app.post('/api/auth/login', (req, res) => {
   }
 });
 
+// Hostel Timings & Schedules API
+app.get('/api/timings', (req, res) => {
+  res.json(dataStore.timings);
+});
+
+// Mess Food Menu API
+app.get('/api/mess-menu', (req, res) => {
+  res.json(dataStore.messMenu);
+});
+
+app.post('/api/mess-menu', (req, res) => {
+  const { day, breakfast, lunch, snacks, dinner, specialTag } = req.body;
+  const existingDay = dataStore.messMenu.find(m => m.day.toLowerCase() === day?.toLowerCase());
+  
+  if (existingDay) {
+    if (breakfast) existingDay.breakfast = breakfast;
+    if (lunch) existingDay.lunch = lunch;
+    if (snacks) existingDay.snacks = snacks;
+    if (dinner) existingDay.dinner = dinner;
+    if (specialTag) existingDay.specialTag = specialTag;
+    return res.json({ message: `Mess menu updated for ${day}`, updatedMenu: existingDay });
+  }
+
+  const newMenuDay = { day, breakfast, lunch, snacks, dinner, specialTag };
+  dataStore.messMenu.push(newMenuDay);
+  res.status(201).json(newMenuDay);
+});
+
+// Hostel Activities & Events API
+app.get('/api/activities', (req, res) => {
+  res.json(dataStore.activities);
+});
+
+app.post('/api/activities/register', (req, res) => {
+  const { activityId, studentId, studentName } = req.body;
+  const activity = dataStore.activities.find(a => a.id === activityId);
+  
+  if (!activity) {
+    return res.status(404).json({ error: 'Activity not found' });
+  }
+
+  if (activity.registeredCount >= activity.maxSlots) {
+    return res.status(400).json({ error: 'Activity registration slots full!' });
+  }
+
+  activity.registeredCount += 1;
+  res.json({ message: `Successfully registered ${studentName} for ${activity.title}!`, activity });
+});
+
 // User Management Routes
 app.get('/api/users', (req, res) => {
   const { role } = req.query;
@@ -300,6 +349,10 @@ if (fs.existsSync(clientDistPath)) {
   });
 }
 
-app.listen(PORT, () => {
-  console.log(`Smart Hostel Management Backend running on http://localhost:${PORT}`);
-});
+if (process.env.NODE_ENV !== 'production' || require.main === module) {
+  app.listen(PORT, () => {
+    console.log(`Smart Hostel Management Backend running on http://localhost:${PORT}`);
+  });
+}
+
+module.exports = app;

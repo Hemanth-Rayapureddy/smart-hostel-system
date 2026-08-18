@@ -16,14 +16,16 @@ import {
   MessageSquare,
   Lock,
   Download,
-  Mail,
-  MapPin,
-  Phone,
+  Utensils,
+  Trophy,
   Star
 } from 'lucide-react';
 import TicketRoomSelector from '../components/TicketRoomSelector';
+import MessMenuViewer from '../components/MessMenuViewer';
+import HostelTimingsCard from '../components/HostelTimingsCard';
+import ActivitiesHub from '../components/ActivitiesHub';
 
-export default function Home({ setActivePage, setActiveRole, roomsData, onAllocateBed }) {
+export default function Home({ setActivePage, setActiveRole, roomsData, timingsData, messMenuData, activitiesData, onAllocateBed, onRegisterActivity }) {
   
   const objectives = [
     { title: "Digitize Hostel Management", desc: "Automate room allocations, resident logs, and daily record keeping.", icon: Zap },
@@ -31,8 +33,8 @@ export default function Home({ setActivePage, setActiveRole, roomsData, onAlloca
     { title: "Track Attendance Digitally", desc: "Warden-managed real-time present/absent logs with monthly exports.", icon: UserCheck },
     { title: "Manage Leave Requests Online", desc: "Digital paperless approval workflow with instant Warden notifications.", icon: Clock },
     { title: "Enable Complaint Submission", desc: "Category-based issue ticketing with status tracking and resolution notes.", icon: MessageSquare },
-    { title: "Improve Communication", desc: "Centralized live notice board for curfew alerts, events, and circulars.", icon: FileText },
-    { title: "Reduce Paperwork & Errors", desc: "Automated digital ledgers, fee receipts, and CSV/PDF report downloads.", icon: Download },
+    { title: "Weekly Mess Menu & Timings", desc: "Track 4-meal daily catering items, dining hours, and curfew schedules.", icon: Utensils },
+    { title: "Hostel Sports & Activities", desc: "Register for inter-hostel chess, football, open mic & tech hackathons.", icon: Trophy },
     { title: "Increase Campus Security", desc: "Approved visitor log management and curfew tracking for safety.", icon: Lock }
   ];
 
@@ -68,7 +70,7 @@ export default function Home({ setActivePage, setActiveRole, roomsData, onAlloca
             </h1>
 
             <p className="text-lg text-slate-300 leading-relaxed font-normal">
-              A comprehensive digital portal offering <span className="text-cyan-300 font-semibold">ticket-booking style room allocation</span>, warden digital attendance, leave request tracking, complaint resolution, visitor security logs, and instant fee management.
+              A comprehensive digital portal offering <span className="text-cyan-300 font-semibold">ticket-booking style room allocation</span>, warden digital attendance, hostel curfew timings, weekly mess menus, sports activities, and instant fee management.
             </p>
 
             {/* Quick Action CTA Buttons */}
@@ -113,7 +115,7 @@ export default function Home({ setActivePage, setActiveRole, roomsData, onAlloca
                 { label: 'Total Hostel Residents', val: '1,240+', icon: Users, color: 'text-blue-400' },
                 { label: 'Room Occupancy Rate', val: '96.4%', icon: Bed, color: 'text-cyan-400' },
                 { label: 'Digital Attendance Log', val: '99.8%', icon: UserCheck, color: 'text-emerald-400' },
-                { label: 'Complaints Resolved', val: '24 hrs avg', icon: CheckCircle, color: 'text-purple-400' }
+                { label: 'Daily Catering Meals', val: '4 Meals', icon: Utensils, color: 'text-amber-400' }
               ].map(st => {
                 const IconC = st.icon;
                 return (
@@ -147,6 +149,25 @@ export default function Home({ setActivePage, setActiveRole, roomsData, onAlloca
         <TicketRoomSelector roomsData={roomsData} onAllocateBed={onAllocateBed} activeRole="Student" />
       </section>
 
+      {/* Hostel Timings & Schedule Section */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <HostelTimingsCard timingsData={timingsData} />
+      </section>
+
+      {/* Weekly Mess Food Menu Section */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <MessMenuViewer messMenuData={messMenuData} activeRole="Student" />
+      </section>
+
+      {/* Hostel Activities & Sports Hub Section */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <ActivitiesHub 
+          activitiesData={activitiesData} 
+          onRegisterActivity={onRegisterActivity} 
+          studentName="Alex Johnson" 
+        />
+      </section>
+
       {/* Problems Identified vs Proposed Solution */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -178,7 +199,7 @@ export default function Home({ setActivePage, setActiveRole, roomsData, onAlloca
               </li>
               <li className="flex items-start gap-3">
                 <span className="w-2 h-2 rounded-full bg-rose-400 mt-2 shrink-0"></span>
-                <span><strong>Security Gaps:</strong> Guest and visitor tracking logged in unverified physical guestbooks.</span>
+                <span><strong>Uncertain Mess Food & Timings:</strong> Lack of weekly menu visibility and missing curfew notifications.</span>
               </li>
             </ul>
           </div>
@@ -206,7 +227,7 @@ export default function Home({ setActivePage, setActiveRole, roomsData, onAlloca
               </li>
               <li className="flex items-start gap-3">
                 <span className="w-2 h-2 rounded-full bg-emerald-400 mt-2 shrink-0"></span>
-                <span><strong>Real-time Approvals & Notifications:</strong> Instant leave request approvals and complaint resolution tracking.</span>
+                <span><strong>Digital Catering & Activity Hub:</strong> Transparent 4-meal daily food items list, curfew clock, and sports event registrations.</span>
               </li>
               <li className="flex items-start gap-3">
                 <span className="w-2 h-2 rounded-full bg-emerald-400 mt-2 shrink-0"></span>
@@ -263,46 +284,6 @@ export default function Home({ setActivePage, setActiveRole, roomsData, onAlloca
               </div>
             </div>
           ))}
-        </div>
-      </section>
-
-      {/* Testimonials */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="glass-panel rounded-3xl p-8 lg:p-12 border border-slate-800">
-          <div className="text-center max-w-xl mx-auto mb-8">
-            <div className="flex justify-center gap-1 text-amber-400 mb-2">
-              {[...Array(5)].map((_, i) => <Star key={i} className="w-5 h-5 fill-amber-400" />)}
-            </div>
-            <h3 className="text-2xl font-bold text-white">Student & Staff Feedback</h3>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div className="p-6 rounded-2xl bg-slate-900/80 border border-slate-800 space-y-3">
-              <p className="text-xs text-slate-300 italic leading-relaxed">
-                "The ticket booking room allocator is amazing! I was able to view floor layouts and pick Bed B in Room A-204 right from my phone on day one."
-              </p>
-              <div className="flex items-center gap-3 pt-2">
-                <div className="w-8 h-8 rounded-full bg-blue-600 text-white font-bold text-xs flex items-center justify-center">AJ</div>
-                <div>
-                  <span className="text-xs font-bold text-white block">Alex Johnson</span>
-                  <span className="text-[10px] text-slate-400">Computer Science Student • Room A-204</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="p-6 rounded-2xl bg-slate-900/80 border border-slate-800 space-y-3">
-              <p className="text-xs text-slate-300 italic leading-relaxed">
-                "Marking daily attendance used to take 45 minutes of paper roll call. Now with the digital Warden portal, I verify Block A in 3 minutes."
-              </p>
-              <div className="flex items-center gap-3 pt-2">
-                <div className="w-8 h-8 rounded-full bg-amber-600 text-white font-bold text-xs flex items-center justify-center">MB</div>
-                <div>
-                  <span className="text-xs font-bold text-white block">Prof. Marcus Brody</span>
-                  <span className="text-[10px] text-slate-400">Senior Hostel Warden • Block A</span>
-                </div>
-              </div>
-            </div>
-          </div>
         </div>
       </section>
 

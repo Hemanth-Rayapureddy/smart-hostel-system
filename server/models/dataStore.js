@@ -82,27 +82,138 @@ const initialData = {
       guardianPhone: "+1 (555) 016-1122",
       feeStatus: "Due",
       attendancePercentage: 88
-    },
-    {
-      id: "u-student-4",
-      name: "Emily Zhang",
-      email: "emily.z@student.edu",
-      role: "Student",
-      rollNo: "AI-2024-012",
-      course: "B.Tech AI & ML (1st Year)",
-      phone: "+1 (555) 015-8899",
-      avatar: "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&q=80&w=250",
-      roomNo: "Unassigned",
-      bedNo: "-",
-      block: "Unassigned",
-      guardianName: "Wei Zhang",
-      guardianPhone: "+1 (555) 015-3344",
-      feeStatus: "Pending",
-      attendancePercentage: 91
     }
   ],
 
-  // Rooms dataset formatted for Ticket Booking Style (Floors, Rooms, Beds A/B/C)
+  // Hostel Operational Schedule & Timings
+  timings: [
+    { id: "t-1", category: "Hostel Entry Curfew", time: "10:00 PM Daily", detail: "Main gate locks strictly. Late arrival requires pre-approved Warden pass.", status: "Strict" },
+    { id: "t-2", category: "Breakfast Service", time: "07:30 AM - 09:30 AM", detail: "Dining Hall 1 & 2. Hot fresh breakfast & tea/coffee counter.", status: "Mess Schedule" },
+    { id: "t-3", category: "Lunch Service", time: "12:30 PM - 02:30 PM", detail: "Full meal menu with salad bar and dessert.", status: "Mess Schedule" },
+    { id: "t-4", category: "Evening Tea & Snacks", time: "05:00 PM - 06:30 PM", detail: "Crispy snacks, sandwiches, hot tea & coffee.", status: "Mess Schedule" },
+    { id: "t-5", category: "Dinner Service", time: "07:30 PM - 09:30 PM", detail: "Dinner buffet with roti, rice, paneer/chicken curries.", status: "Mess Schedule" },
+    { id: "t-6", category: "Quiet Study Hours", time: "10:30 PM - 06:00 AM", detail: "Library & floor corridor silence policy for peaceful study.", status: "Daily Policy" },
+    { id: "t-7", category: "Visitor Lounge Hours", time: "09:00 AM - 06:00 PM", detail: "Parents & registered guests permitted in ground floor lounge.", status: "Security" },
+    { id: "t-8", category: "Gym & Sports Complex", time: "06:00 AM - 09:00 PM", detail: "Fitness equipment, badminton courts & indoor games.", status: "Recreation" }
+  ],
+
+  // Weekly Mess Menu Dataset
+  messMenu: [
+    {
+      day: "Monday",
+      breakfast: "Puri Bhaji, Oats Porridge, Boiled Eggs, Fresh Fruits, Tea/Coffee",
+      lunch: "Rajma Masala, Steamed Basmati Rice, Butter Roti, Cucumber Salad, Curd",
+      snacks: "Samosa with Mint Chutney, Masala Tea, Coffee",
+      dinner: "Kadai Paneer / Chicken Curry, Dal Tadka, Jeera Rice, Chapati, Gulab Jamun",
+      specialTag: "Chef Special North Indian Thali"
+    },
+    {
+      day: "Tuesday",
+      breakfast: "Idli Sambhar, Coconut Chutney, Cornflakes with Milk, Coffee",
+      lunch: "Chole Bhature, Veg Pulao, Boondi Raita, Onion Salad",
+      snacks: "Veg Cheese Sandwich, Cold Coffee",
+      dinner: "Mix Veg Handi, Dal Makhani, Phulka, Steamed Rice, Fruit Custard",
+      specialTag: "South Indian Special Breakfast"
+    },
+    {
+      day: "Wednesday",
+      breakfast: "Aloo Paratha with White Butter, Curd, Sprouts, Hot Tea",
+      lunch: "Kadhi Pakoda, Steam Rice, Bhindi Fry, Chapati, Roasted Papad",
+      snacks: "Pav Bhaji, Lemonade",
+      dinner: "Paneer Butter Masala / Butter Chicken, Garlic Naan, Veg Biryani, Ice Cream",
+      specialTag: "Special Feast Dinner"
+    },
+    {
+      day: "Thursday",
+      breakfast: "Masala Dosa, Tomato Chutney, Medu Vada, Filter Coffee",
+      lunch: "Dal Fry, Jeera Aloo, Peas Pulao, Roti, Salad",
+      snacks: "Bhel Puri / Sev Puri, Ginger Tea",
+      dinner: "Malai Kofta, Dal Panchmel, Butter Roti, Basmati Rice, Kheer",
+      specialTag: "Comfort Food Menu"
+    },
+    {
+      day: "Friday",
+      breakfast: "Poha with Roasted Peanuts, Veg Cutlet, Omelette, Tea",
+      lunch: "Veg Hyderabadi Biryani / Chicken Biryani, Mirchi Ka Salan, Raita",
+      snacks: "French Fries with Dip, Hot Chocolate",
+      dinner: "Paneer Tikka Masala, Dal Makhani, Tandoori Roti, Veg Pulao, Rasgulla",
+      specialTag: "Biryani Special Friday"
+    },
+    {
+      day: "Saturday",
+      breakfast: "Uttapam with Sambhar, Upma, Fresh Orange Juice, Tea",
+      lunch: "Aloo Gobi, Chana Dal, Rice, Chapati, Green Salad",
+      snacks: "Bread Pakora, Hot Coffee",
+      dinner: "Shahi Paneer, Dal Tadka, Missi Roti, Steamed Rice, Moong Dal Halwa",
+      specialTag: "Traditional Thali"
+    },
+    {
+      day: "Sunday",
+      breakfast: "Chole Puri, Sweet Lassi, Boiled Eggs, Fruits",
+      lunch: "Special Dum Biryani (Veg/Non-Veg), Paneer Pasanda, Garlic Naan, Sweet Paan",
+      snacks: "Samosa Chaat, Milkshake",
+      dinner: "Hakha Noodles, Manchurian, Fried Rice, Ice Cream Sundae",
+      specialTag: "Sunday Fiesta Special"
+    }
+  ],
+
+  // Hostel Activities & Events
+  activities: [
+    {
+      id: "act-1",
+      title: "Inter-Hostel Chess Championship 2026",
+      category: "Sports & Gaming",
+      date: "2026-08-25",
+      time: "04:00 PM - 08:00 PM",
+      venue: "Block A Common Recreation Lounge",
+      organizer: "Hostel Sports Council",
+      description: "Speed chess tournament with trophies & cash prizes for top 3 grandmasters.",
+      maxSlots: 32,
+      registeredCount: 21,
+      image: "https://images.unsplash.com/photo-1529699211952-734e80c4d42b?auto=format&fit=crop&q=80&w=400"
+    },
+    {
+      id: "act-2",
+      title: "Annual Cultural Music & Open Mic Night",
+      category: "Cultural & Arts",
+      date: "2026-08-30",
+      time: "06:30 PM - 09:30 PM",
+      venue: "Central Amphitheatre Grounds",
+      organizer: "Student Cultural Committee",
+      description: "Live acoustic performances, poetry reading, stand-up comedy, and band acts.",
+      maxSlots: 100,
+      registeredCount: 64,
+      image: "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&q=80&w=400"
+    },
+    {
+      id: "act-3",
+      title: "Robotics & AI Innovation Hackathon",
+      category: "Technical & Tech",
+      date: "2026-09-05",
+      time: "09:00 AM - 06:00 PM",
+      venue: "Smart Innovation Lab Floor 3",
+      organizer: "Hostel IT & Tech Society",
+      description: "24-hour prototype build challenge. IoT smart room projects & automation.",
+      maxSlots: 50,
+      registeredCount: 38,
+      image: "https://images.unsplash.com/photo-1485827404703-89b55fcc595e?auto=format&fit=crop&q=80&w=400"
+    },
+    {
+      id: "act-4",
+      title: "Table Tennis & Badminton Tournament",
+      category: "Sports & Gaming",
+      date: "2026-09-12",
+      time: "07:00 AM - 01:00 PM",
+      venue: "Hostel Indoor Sports Complex",
+      organizer: "Prof. Marcus Brody (Warden)",
+      description: "Singles and doubles knockout tournament for all resident blocks.",
+      maxSlots: 40,
+      registeredCount: 29,
+      image: "https://images.unsplash.com/photo-1534158914592-062992fbe900?auto=format&fit=crop&q=80&w=400"
+    }
+  ],
+
+  // Rooms dataset formatted for Ticket Booking Style
   rooms: [
     {
       id: "rm-101",
@@ -169,28 +280,13 @@ const initialData = {
         { id: "B-102-BedA", name: "Bed A", isOccupied: true, studentId: "u-student-3", studentName: "Liam O'Connor" },
         { id: "B-102-BedB", name: "Bed B", isOccupied: false, studentId: null, studentName: null }
       ]
-    },
-    {
-      id: "rm-302",
-      roomNo: "B-201",
-      floor: 2,
-      block: "Block B - Emerald Hall",
-      type: "3-Sharing Standard",
-      pricePerSemester: "$850",
-      amenities: ["Ceiling Fan", "Shared Bath", "Individual Desks", "WiFi"],
-      beds: [
-        { id: "B-201-BedA", name: "Bed A", isOccupied: false, studentId: null, studentName: null },
-        { id: "B-201-BedB", name: "Bed B", isOccupied: false, studentId: null, studentName: null },
-        { id: "B-201-BedC", name: "Bed C", isOccupied: false, studentId: null, studentName: null }
-      ]
     }
   ],
 
   attendance: [
-    { id: "att-1", studentId: "u-student-1", studentName: "Alex Johnson", roomNo: "A-204", date: "2026-07-24", status: "Present", markedBy: "Prof. Marcus Brody" },
-    { id: "att-2", studentId: "u-student-2", studentName: "Sophia Martinez", roomNo: "A-204", date: "2026-07-24", status: "Present", markedBy: "Prof. Marcus Brody" },
-    { id: "att-3", studentId: "u-student-3", studentName: "Liam O'Connor", roomNo: "B-102", date: "2026-07-24", status: "On Leave", markedBy: "Sarah Jenkins" },
-    { id: "att-4", studentId: "u-student-4", studentName: "Emily Zhang", roomNo: "Unassigned", date: "2026-07-24", status: "Absent", markedBy: "Prof. Marcus Brody" }
+    { id: "att-1", studentId: "u-student-1", studentName: "Alex Johnson", roomNo: "A-204", date: "2026-08-18", status: "Present", markedBy: "Prof. Marcus Brody" },
+    { id: "att-2", studentId: "u-student-2", studentName: "Sophia Martinez", roomNo: "A-204", date: "2026-08-18", status: "Present", markedBy: "Prof. Marcus Brody" },
+    { id: "att-3", studentId: "u-student-3", studentName: "Liam O'Connor", roomNo: "B-102", date: "2026-08-18", status: "On Leave", markedBy: "Sarah Jenkins" }
   ],
 
   leaves: [
@@ -200,38 +296,12 @@ const initialData = {
       studentName: "Alex Johnson",
       roomNo: "A-204",
       reason: "Attending National AI hackathon at Tech Summit City",
-      startDate: "2026-07-28",
-      endDate: "2026-07-31",
+      startDate: "2026-08-28",
+      endDate: "2026-08-31",
       destination: "San Francisco, CA",
       status: "Approved",
-      appliedOn: "2026-07-20",
+      appliedOn: "2026-08-15",
       approvedBy: "Prof. Marcus Brody"
-    },
-    {
-      id: "l-102",
-      studentId: "u-student-3",
-      studentName: "Liam O'Connor",
-      roomNo: "B-102",
-      reason: "Family emergency visit to hometown",
-      startDate: "2026-07-24",
-      endDate: "2026-07-26",
-      destination: "Chicago, IL",
-      status: "Approved",
-      appliedOn: "2026-07-22",
-      approvedBy: "Sarah Jenkins"
-    },
-    {
-      id: "l-103",
-      studentId: "u-student-2",
-      studentName: "Sophia Martinez",
-      roomNo: "A-204",
-      reason: "Medical appointment & dental procedure",
-      startDate: "2026-08-01",
-      endDate: "2026-08-02",
-      destination: "City Medical Center",
-      status: "Pending",
-      appliedOn: "2026-07-24",
-      approvedBy: null
     }
   ],
 
@@ -246,34 +316,8 @@ const initialData = {
       description: "The AC unit is blowing ambient air and making a low humming noise. Requesting technician check.",
       priority: "Medium",
       status: "In Progress",
-      createdAt: "2026-07-23",
-      resolution: "Technician assigned for maintenance on 25th July."
-    },
-    {
-      id: "c-302",
-      studentId: "u-student-3",
-      studentName: "Liam O'Connor",
-      roomNo: "B-102",
-      category: "Plumbing",
-      title: "Hot water valve leaking",
-      description: "Bathroom hot water line has minor dripping leak in B-102.",
-      priority: "High",
-      status: "Pending",
-      createdAt: "2026-07-24",
-      resolution: null
-    },
-    {
-      id: "c-303",
-      studentId: "u-student-2",
-      studentName: "Sophia Martinez",
-      roomNo: "A-204",
-      category: "Internet & IT",
-      title: "WiFi speed drop on Floor 2",
-      description: "Ping spikes during evening study hours (8 PM - 10 PM).",
-      priority: "Low",
-      status: "Resolved",
-      createdAt: "2026-07-18",
-      resolution: "Access point router restarted and firmware upgraded."
+      createdAt: "2026-08-17",
+      resolution: "Technician assigned for maintenance on 19th August."
     }
   ],
 
@@ -286,23 +330,10 @@ const initialData = {
       relation: "Father",
       contact: "+1 (555) 018-9900",
       purpose: "Delivering luggage & textbook supplies",
-      visitDate: "2026-07-25",
+      visitDate: "2026-08-20",
       timeSlot: "02:00 PM - 05:00 PM",
       status: "Approved",
       approvedBy: "Prof. Marcus Brody"
-    },
-    {
-      id: "v-502",
-      studentId: "u-student-2",
-      studentName: "Sophia Martinez",
-      visitorName: "Elena Martinez",
-      relation: "Sister",
-      contact: "+1 (555) 017-9911",
-      purpose: "Weekend visit",
-      visitDate: "2026-07-26",
-      timeSlot: "10:00 AM - 01:00 PM",
-      status: "Pending",
-      approvedBy: null
     }
   ],
 
@@ -320,24 +351,8 @@ const initialData = {
       paidAmount: 1950,
       status: "Paid",
       dueDate: "2026-08-10",
-      paymentDate: "2026-07-10",
+      paymentDate: "2026-08-01",
       transactionId: "TXN-8829104-X"
-    },
-    {
-      id: "f-102",
-      studentId: "u-student-3",
-      studentName: "Liam O'Connor",
-      roomNo: "B-102",
-      academicYear: "2026-2027 (Fall Semester)",
-      roomRent: 900,
-      messCharges: 450,
-      utilityDeposit: 150,
-      totalAmount: 1500,
-      paidAmount: 0,
-      status: "Due",
-      dueDate: "2026-08-10",
-      paymentDate: null,
-      transactionId: null
     }
   ],
 
@@ -346,27 +361,18 @@ const initialData = {
       id: "n-1",
       title: "Hostel Entry Curfew & Gate Timing Reminder",
       category: "Announcement",
-      content: "All hostel residents are advised that the main entrance gates will strictly close at 10:00 PM daily. Late entry requires warden approval.",
+      content: "All hostel residents are advised that main entrance gates close strictly at 10:00 PM daily. Late entry requires warden clearance.",
       author: "Dr. Robert Vance (Admin)",
-      date: "2026-07-22",
+      date: "2026-08-15",
       pinned: true
     },
     {
       id: "n-2",
-      title: "Annual Sports & Cultural Festival Registration",
+      title: "Sunday Special Menu & Feast Voting",
       category: "Events",
-      content: "Registration for inter-hostel football, chess, and robotics tournaments is now open until July 30th. Sign up at warden desk.",
-      author: "Prof. Marcus Brody (Warden)",
-      date: "2026-07-21",
-      pinned: false
-    },
-    {
-      id: "n-3",
-      title: "High-Speed Fiber Router Maintenance Schedule",
-      category: "Circular",
-      content: "Network maintenance will take place on Saturday midnight (1:00 AM - 3:00 AM). Brief internet service interruptions may occur.",
-      author: "Hostel IT Cell",
-      date: "2026-07-19",
+      content: "Vote for your preferred Sunday dinner special menu item on the Mess Module by Friday evening.",
+      author: "Hostel Mess Committee",
+      date: "2026-08-16",
       pinned: false
     }
   ],
@@ -374,8 +380,7 @@ const initialData = {
   rules: [
     { id: "r-1", title: "Quiet Hours Policy", detail: "Strict silence in study blocks from 10:30 PM to 6:00 AM." },
     { id: "r-2", title: "Visitor Guidelines", detail: "External guests allowed only in common lounge between 9:00 AM and 6:00 PM with Warden approval log." },
-    { id: "r-3", title: "Electrical Appliance Code", detail: "High wattage induction stoves & heaters strictly prohibited inside student rooms for safety." },
-    { id: "r-4", title: "Mess & Dining Discipline", detail: "Food must be consumed in the dining hall; non-transferable biometric or RFID digital coupon scan required." }
+    { id: "r-3", title: "Electrical Appliance Code", detail: "High wattage induction stoves & heaters strictly prohibited inside student rooms for safety." }
   ]
 };
 

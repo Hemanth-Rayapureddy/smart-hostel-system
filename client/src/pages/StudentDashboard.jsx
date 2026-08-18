@@ -13,12 +13,33 @@ import {
   AlertCircle, 
   Ticket, 
   Sparkles,
-  Download,
+  Utensils,
+  Trophy,
   CreditCard
 } from 'lucide-react';
 import TicketRoomSelector from '../components/TicketRoomSelector';
+import MessMenuViewer from '../components/MessMenuViewer';
+import HostelTimingsCard from '../components/HostelTimingsCard';
+import ActivitiesHub from '../components/ActivitiesHub';
 
-export default function StudentDashboard({ student, leaves, complaints, visitors, fees, notices, roomsData, onApplyLeave, onSubmitComplaint, onRequestVisitor, onPayFee, onAllocateBed }) {
+export default function StudentDashboard({ 
+  student, 
+  leaves, 
+  complaints, 
+  visitors, 
+  fees, 
+  notices, 
+  roomsData, 
+  timingsData, 
+  messMenuData, 
+  activitiesData, 
+  onApplyLeave, 
+  onSubmitComplaint, 
+  onRequestVisitor, 
+  onPayFee, 
+  onAllocateBed,
+  onRegisterActivity
+}) {
   const [activeTab, setActiveTab] = useState('overview');
   
   // Modals state
@@ -151,6 +172,8 @@ export default function StudentDashboard({ student, leaves, complaints, visitors
         {[
           { id: 'overview', label: 'Dashboard Overview', icon: User },
           { id: 'room-ticket', label: 'Ticket Room Allocator', icon: Ticket },
+          { id: 'mess-menu', label: 'Food Menu & Timings', icon: Utensils },
+          { id: 'activities', label: 'Hostel Activities', icon: Trophy },
           { id: 'leave', label: 'Leave Requests', icon: Calendar },
           { id: 'complaints', label: 'Complaints', icon: MessageSquare },
           { id: 'visitors', label: 'Visitor Pass', icon: ShieldCheck },
@@ -223,7 +246,7 @@ export default function StudentDashboard({ student, leaves, complaints, visitors
             </div>
           </div>
 
-          {/* Active Status Split View */}
+          {/* Timings & Room Info Split View */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             
             {/* Room Allocation Status Card */}
@@ -290,7 +313,24 @@ export default function StudentDashboard({ student, leaves, complaints, visitors
         <TicketRoomSelector roomsData={roomsData} onAllocateBed={onAllocateBed} activeRole="Student" />
       )}
 
-      {/* TAB CONTENT 3: Leave Requests */}
+      {/* TAB CONTENT 3: Mess Menu & Timings */}
+      {activeTab === 'mess-menu' && (
+        <div className="space-y-8">
+          <HostelTimingsCard timingsData={timingsData} />
+          <MessMenuViewer messMenuData={messMenuData} activeRole="Student" />
+        </div>
+      )}
+
+      {/* TAB CONTENT 4: Activities */}
+      {activeTab === 'activities' && (
+        <ActivitiesHub 
+          activitiesData={activitiesData} 
+          onRegisterActivity={onRegisterActivity} 
+          studentName={student.name} 
+        />
+      )}
+
+      {/* TAB CONTENT 5: Leave Requests */}
       {activeTab === 'leave' && (
         <div className="space-y-6">
           <div className="flex items-center justify-between">
@@ -326,7 +366,7 @@ export default function StudentDashboard({ student, leaves, complaints, visitors
         </div>
       )}
 
-      {/* TAB CONTENT 4: Complaints */}
+      {/* TAB CONTENT 6: Complaints */}
       {activeTab === 'complaints' && (
         <div className="space-y-6">
           <div className="flex items-center justify-between">
@@ -365,7 +405,7 @@ export default function StudentDashboard({ student, leaves, complaints, visitors
         </div>
       )}
 
-      {/* TAB CONTENT 5: Visitors */}
+      {/* TAB CONTENT 7: Visitors */}
       {activeTab === 'visitors' && (
         <div className="space-y-6">
           <div className="flex items-center justify-between">
@@ -401,7 +441,7 @@ export default function StudentDashboard({ student, leaves, complaints, visitors
         </div>
       )}
 
-      {/* TAB CONTENT 6: Fee Management */}
+      {/* TAB CONTENT 8: Fee Management */}
       {activeTab === 'fee' && studentFee && (
         <div className="glass-panel p-8 rounded-3xl border border-slate-800 max-w-2xl mx-auto space-y-6">
           <div className="flex items-center justify-between pb-4 border-b border-slate-800">
