@@ -18,7 +18,8 @@ import {
   Download,
   Utensils,
   Trophy,
-  Star
+  Star,
+  User
 } from 'lucide-react';
 import TicketRoomSelector from '../components/TicketRoomSelector';
 import MessMenuViewer from '../components/MessMenuViewer';
@@ -39,9 +40,36 @@ export default function Home({ setActivePage, setActiveRole, roomsData, timingsD
   ];
 
   const teamMembers = [
-    { name: "Dr. Robert Vance", role: "Chief Hostel Administrator", image: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=300", department: "Admin Oversight & Policy" },
-    { name: "Prof. Marcus Brody", role: "Senior Warden (Block A)", image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=300", department: "Attendance & Student Welfare" },
-    { name: "Sarah Jenkins", role: "Warden (Block B)", image: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=300", department: "Leave & Security Verification" }
+    { name: "Dr. Robert Vance", role: "Chief Hostel Administrator", department: "Admin Oversight & Policy" },
+    { name: "Prof. Marcus Brody", role: "Senior Warden (Block A)", department: "Attendance & Student Welfare" },
+    { name: "Sarah Jenkins", role: "Warden (Block B)", department: "Leave & Security Verification" }
+  ];
+
+  const reviewExamples = [
+    {
+      id: "rev-1",
+      name: "Student Resident (Computer Science)",
+      role: "Resident • Block A, Room 204",
+      rating: 5,
+      comment: "The ticket-booking method for room allocation made selecting my bed in Block A so smooth! I could inspect room amenities and pick the window bed instantly without any manual paper queues.",
+      badge: "Verified Resident"
+    },
+    {
+      id: "rev-2",
+      name: "Senior Warden Review",
+      role: "Block Supervisor & Attendance Lead",
+      rating: 5,
+      comment: "Warden daily digital attendance system saves so much time compared to manual registers. Marking platform registered students present or absent with instant CSV export is effortless.",
+      badge: "Verified Warden"
+    },
+    {
+      id: "rev-3",
+      name: "Engineering Resident Review",
+      role: "Resident • Block B, Room 102",
+      rating: 5,
+      comment: "Having weekly 4-meal mess menus and hostel curfew timings displayed live on my student dashboard helps me plan study hours, dining times, and hostel sports activities perfectly.",
+      badge: "Verified Resident"
+    }
   ];
 
   return (
@@ -262,7 +290,62 @@ export default function Home({ setActivePage, setActiveRole, roomsData, timingsD
         </div>
       </section>
 
-      {/* Leadership & Warden Staff */}
+      {/* Reviews & Testimonials Section (Clean Layout with Empty Photo Placeholders) */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="text-center max-w-2xl mx-auto mb-12 space-y-2">
+          <span className="text-xs font-bold text-blue-400 uppercase tracking-widest bg-blue-500/10 px-3 py-1 rounded-full border border-blue-500/30">
+            Platform Reviews & Feedback
+          </span>
+          <h2 className="text-3xl font-extrabold text-white">Resident & Staff Feedback</h2>
+          <p className="text-slate-400 text-sm">Review examples from students and wardens using SmartHostel</p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {reviewExamples.map(rev => (
+            <div key={rev.id} className="glass-panel rounded-3xl p-6 border border-slate-800 space-y-4 hover:border-blue-500/50 transition-all flex flex-col justify-between">
+              <div className="space-y-3">
+                
+                {/* Header with Empty Photo Placeholder Frame */}
+                <div className="flex items-center gap-3.5">
+                  
+                  {/* Empty Photo Placeholder Frame */}
+                  <div className="w-14 h-14 rounded-2xl bg-slate-900 border-2 border-dashed border-slate-700 flex flex-col items-center justify-center text-slate-500 shadow-inner">
+                    <User className="w-6 h-6 text-slate-400" />
+                    <span className="text-[8px] font-mono text-slate-500 uppercase tracking-tighter">PHOTO</span>
+                  </div>
+
+                  <div>
+                    <h4 className="font-bold text-sm text-white">{rev.name}</h4>
+                    <span className="text-[11px] text-slate-400 block">{rev.role}</span>
+                    <span className="inline-block text-[10px] font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20 mt-1">
+                      ✓ {rev.badge}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Rating Stars */}
+                <div className="flex items-center gap-1 text-amber-400 pt-1">
+                  {[...Array(rev.rating)].map((_, i) => (
+                    <Star key={i} className="w-4 h-4 fill-amber-400 text-amber-400" />
+                  ))}
+                </div>
+
+                {/* Review Text Example */}
+                <p className="text-xs text-slate-300 leading-relaxed italic bg-slate-900/60 p-3.5 rounded-xl border border-slate-800/60">
+                  "{rev.comment}"
+                </p>
+              </div>
+
+              <div className="pt-2 border-t border-slate-800/80 flex items-center justify-between text-[11px] text-slate-500 font-mono">
+                <span>VERIFIED REVIEW</span>
+                <span>SMART HOSTEL SYSTEM</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Leadership & Warden Staff (Empty Photo Placeholders) */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center max-w-2xl mx-auto mb-12">
           <h2 className="text-3xl font-extrabold text-white">Hostel Administration & Wardens</h2>
@@ -272,11 +355,13 @@ export default function Home({ setActivePage, setActiveRole, roomsData, timingsD
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {teamMembers.map(tm => (
             <div key={tm.name} className="glass-panel rounded-3xl p-6 border border-slate-800 text-center space-y-4 hover:border-slate-700 transition-all">
-              <img 
-                src={tm.image} 
-                alt={tm.name} 
-                className="w-24 h-24 rounded-2xl mx-auto object-cover border-2 border-blue-500/50 shadow-lg shadow-blue-500/20"
-              />
+              
+              {/* Empty Photo Placeholder Frame */}
+              <div className="w-20 h-20 rounded-2xl mx-auto bg-slate-900 border-2 border-dashed border-slate-700 flex flex-col items-center justify-center text-slate-400 shadow-lg">
+                <User className="w-8 h-8 text-blue-400" />
+                <span className="text-[8px] font-mono text-slate-500 uppercase mt-0.5">OFFICIAL</span>
+              </div>
+
               <div>
                 <h4 className="font-bold text-lg text-white">{tm.name}</h4>
                 <span className="text-xs font-semibold text-blue-400 block">{tm.role}</span>
