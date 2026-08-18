@@ -116,10 +116,21 @@ export default function Home({ setActivePage, setActiveRole, roomsData, timingsD
 
               <button
                 onClick={() => {
+                  const elem = document.getElementById('hostel-timings-section');
+                  if (elem) elem.scrollIntoView({ behavior: 'smooth' });
+                }}
+                className="px-6 py-4 rounded-2xl bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 text-amber-300 font-extrabold text-sm flex items-center gap-2 transition-all hover:scale-105"
+              >
+                <Utensils className="w-4 h-4 text-amber-400" />
+                <span>Mess Menu & Timings</span>
+              </button>
+
+              <button
+                onClick={() => {
                   setActiveRole('Warden');
                   setActivePage('warden-dashboard');
                 }}
-                className="px-8 py-4 rounded-2xl bg-slate-900 hover:bg-slate-800 border border-slate-700 text-white font-extrabold text-sm flex items-center gap-2 transition-all hover:scale-105"
+                className="px-6 py-4 rounded-2xl bg-slate-900 hover:bg-slate-800 border border-slate-700 text-white font-extrabold text-sm flex items-center gap-2 transition-all hover:scale-105"
               >
                 <UserCheck className="w-4 h-4 text-amber-400" />
                 <span>Warden Portal</span>
@@ -130,7 +141,7 @@ export default function Home({ setActivePage, setActiveRole, roomsData, timingsD
                   setActiveRole('Admin');
                   setActivePage('admin-dashboard');
                 }}
-                className="px-8 py-4 rounded-2xl bg-slate-900 hover:bg-slate-800 border border-slate-700 text-white font-extrabold text-sm flex items-center gap-2 transition-all hover:scale-105"
+                className="px-6 py-4 rounded-2xl bg-slate-900 hover:bg-slate-800 border border-slate-700 text-white font-extrabold text-sm flex items-center gap-2 transition-all hover:scale-105"
               >
                 <ShieldCheck className="w-4 h-4 text-purple-400" />
                 <span>Admin Portal</span>
@@ -178,7 +189,7 @@ export default function Home({ setActivePage, setActiveRole, roomsData, timingsD
       </section>
 
       {/* Hostel Timings & Schedule Section */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section id="hostel-timings-section" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <HostelTimingsCard timingsData={timingsData} />
       </section>
 
