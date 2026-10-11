@@ -19,6 +19,8 @@ import {
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
 
+console.log("SUPABASE URL:", supabaseUrl);
+console.log("SUPABASE KEY EXISTS:", !!supabaseAnonKey);
 export const isLiveSupabase = Boolean(supabaseUrl && supabaseAnonKey);
 
 export const supabase = isLiveSupabase
@@ -333,4 +335,23 @@ export const localStore = {
 
   getMessFeedback: (): MessFeedback[] => getStored('mess_feedback', []),
   setMessFeedback: (data: MessFeedback[]) => setStored('mess_feedback', data),
+
+  getStudents: (): StudentProfile[] => getStored('students_list', DEMO_STUDENTS),
+  setStudents: (data: StudentProfile[]) => setStored('students_list', data),
+
+  getWardens: (): UserProfile[] => getStored('wardens_list', [DEMO_WARDEN]),
+  setWardens: (data: UserProfile[]) => setStored('wardens_list', data),
+
+  getAuthAccounts: (): { email: string; password: string; role: string; profileId: string }[] =>
+    getStored('auth_accounts', [
+      { email: 'student1@hostel.com', password: 'password123', role: 'student', profileId: 's1' },
+      { email: 'student2@hostel.com', password: 'password123', role: 'student', profileId: 's2' },
+      { email: 'student3@hostel.com', password: 'password123', role: 'student', profileId: 's3' },
+      { email: 'warden@hostel.com', password: 'password123', role: 'warden', profileId: 'w1' },
+    ]),
+  setAuthAccounts: (data: { email: string; password: string; role: string; profileId: string }[]) =>
+    setStored('auth_accounts', data),
+
+  getEscalationHours: (): number => getStored('escalation_hours', 48),
+  setEscalationHours: (hours: number) => setStored('escalation_hours', hours),
 };

@@ -22,11 +22,8 @@ export const Header: React.FC<HeaderProps> = ({ onOpenEmergency, activeTab, setA
   const {
     currentUser,
     userRole,
-    allStudents,
     notifications,
     unreadNotificationCount,
-    loginAsStudent,
-    loginAsWarden,
     logout,
     markNotificationAsRead,
   } = useAuth();
@@ -64,31 +61,6 @@ export const Header: React.FC<HeaderProps> = ({ onOpenEmergency, activeTab, setA
 
           {/* Right Header Actions */}
           <div className="flex items-center space-x-3">
-            {/* Quick Demo Student Switcher */}
-            <div className="relative hidden md:block">
-              <select
-                value={currentUser?.id || ''}
-                onChange={(e) => {
-                  if (e.target.value === 'warden') {
-                    loginAsWarden();
-                  } else {
-                    loginAsStudent(e.target.value);
-                  }
-                }}
-                className="text-xs bg-gray-50 border border-gray-300 rounded-lg px-2.5 py-1.5 font-medium text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <optgroup label="Switch Student Account">
-                  {allStudents.map((s) => (
-                    <option key={s.id} value={s.id}>
-                      🎓 {s.fullName} ({s.hostelBlock} - R{s.roomNumber})
-                    </option>
-                  ))}
-                </optgroup>
-                <optgroup label="Warden Account">
-                  <option value="warden">🛡️ Warden Dr. K. V. Raman</option>
-                </optgroup>
-              </select>
-            </div>
 
             {/* Notification Bell Dropdown */}
             <div className="relative">
