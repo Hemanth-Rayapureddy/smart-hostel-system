@@ -1,24 +1,24 @@
 -- ==============================================================================
 -- SMART STUDENT HOSTEL MANAGEMENT SYSTEM - DATABASE SCHEMA & PERMISSIONS FIX
--- (Policies are dropped FIRST so PostgreSQL column alterations succeed smoothly)
+-- (Safe version: Keeps profile/student IDs intact and unblocks operational tables)
 -- ==============================================================================
 
 -- =========================================================
 -- 1. FIX COMPLAINTS TABLE
 -- =========================================================
--- Step A: Drop old policies that depend on columns first
+-- Drop old policies first
 DROP POLICY IF EXISTS "Student inserts own complaints" ON public.complaints;
 DROP POLICY IF EXISTS "Student views own complaints, Warden views all" ON public.complaints;
 DROP POLICY IF EXISTS "Warden or student updates complaint" ON public.complaints;
 DROP POLICY IF EXISTS "Public full access complaints" ON public.complaints;
 
--- Step B: Alter constraints and column types
+-- Drop foreign key and allow text student_id
 ALTER TABLE public.complaints DROP CONSTRAINT IF EXISTS complaints_student_id_fkey;
 ALTER TABLE public.complaints ALTER COLUMN student_id DROP NOT NULL;
 ALTER TABLE public.complaints ALTER COLUMN student_id TYPE TEXT USING student_id::text;
 ALTER TABLE public.complaints ADD COLUMN IF NOT EXISTS student_name TEXT;
 
--- Step C: Re-enable RLS with public full access policy
+-- Enable public RLS policy
 ALTER TABLE public.complaints ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Public full access complaints" ON public.complaints
   FOR ALL TO anon, authenticated
@@ -29,13 +29,11 @@ CREATE POLICY "Public full access complaints" ON public.complaints
 -- =========================================================
 -- 2. FIX LEAVE REQUESTS TABLE
 -- =========================================================
--- Step A: Drop old policies first
 DROP POLICY IF EXISTS "Student views own leave, Warden views all" ON public.leave_requests;
 DROP POLICY IF EXISTS "Student creates own leave" ON public.leave_requests;
 DROP POLICY IF EXISTS "Warden approves/updates leave" ON public.leave_requests;
 DROP POLICY IF EXISTS "Public full access leave_requests" ON public.leave_requests;
 
--- Step B: Alter constraints and columns
 ALTER TABLE public.leave_requests DROP CONSTRAINT IF EXISTS leave_requests_student_id_fkey;
 ALTER TABLE public.leave_requests ALTER COLUMN student_id DROP NOT NULL;
 ALTER TABLE public.leave_requests ALTER COLUMN student_id TYPE TEXT USING student_id::text;
@@ -43,7 +41,6 @@ ALTER TABLE public.leave_requests ADD COLUMN IF NOT EXISTS student_name TEXT;
 ALTER TABLE public.leave_requests ADD COLUMN IF NOT EXISTS block TEXT;
 ALTER TABLE public.leave_requests ADD COLUMN IF NOT EXISTS room_number TEXT;
 
--- Step C: Enable RLS with public policy
 ALTER TABLE public.leave_requests ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Public full access leave_requests" ON public.leave_requests
   FOR ALL TO anon, authenticated
@@ -98,6 +95,7 @@ DROP POLICY IF EXISTS "Warden manages attendance" ON public.attendance;
 DROP POLICY IF EXISTS "Public full access attendance" ON public.attendance;
 
 ALTER TABLE public.attendance DROP CONSTRAINT IF EXISTS attendance_student_id_fkey;
+ALTER TABLE public.attendance DROP CONSTRAINT IF EXISTS attendance_marked_by_fkey;
 ALTER TABLE public.attendance DROP CONSTRAINT IF EXISTS attendance_student_id_date_key;
 ALTER TABLE public.attendance ALTER COLUMN student_id DROP NOT NULL;
 ALTER TABLE public.attendance ALTER COLUMN student_id TYPE TEXT USING student_id::text;
@@ -149,38 +147,46 @@ CREATE POLICY "Public full access notices" ON public.notices
 
 
 -- =========================================================
--- 8. FIX ROOMS, PROFILES, STUDENTS & NOTIFICATIONS
+-- 8. ENABLE PUBLIC POLICIES ON PROFILES, STUDENTS, ROOMS & NOTIFICATIONS
+-- (Keeps id types as UUID to avoid foreign key incompatibilities)
 -- =========================================================
 ALTER TABLE public.rooms ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "Public full access rooms" ON public.rooms;
-CREATE POLICY "Public full access rooms" ON public.rooms FOR ALL TO anon, authenticated USING (true) WITH CHECK (true);
+CREATE POLICY "Public full access rooms" ON public.rooms
+  FOR ALL TO anon, authenticated
+  USING (true)
+  WITH CHECK (true);
 
 DROP POLICY IF EXISTS "Users can view own profile or Wardens view all" ON public.profiles;
 DROP POLICY IF EXISTS "Users can update own profile" ON public.profiles;
 DROP POLICY IF EXISTS "Public full access profiles" ON public.profiles;
-
-ALTER TABLE public.profiles DROP CONSTRAINT IF EXISTS profiles_id_fkey;
-ALTER TABLE public.profiles ALTER COLUMN id TYPE TEXT USING id::text;
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "Public full access profiles" ON public.profiles FOR ALL TO anon, authenticated USING (true) WITH CHECK (true);
+CREATE POLICY "Public full access profiles" ON public.profiles
+  FOR ALL TO anon, authenticated
+  USING (true)
+  WITH CHECK (true);
 
 DROP POLICY IF EXISTS "Student views own row, Warden views all" ON public.students;
 DROP POLICY IF EXISTS "Warden can manage students" ON public.students;
 DROP POLICY IF EXISTS "Public full access students" ON public.students;
-
-ALTER TABLE public.students DROP CONSTRAINT IF EXISTS students_id_fkey;
-ALTER TABLE public.students ALTER COLUMN id TYPE TEXT USING id::text;
 ALTER TABLE public.students ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "Public full access students" ON public.students FOR ALL TO anon, authenticated USING (true) WITH CHECK (true);
+CREATE POLICY "Public full access students" ON public.students
+  FOR ALL TO anon, authenticated
+  USING (true)
+  WITH CHECK (true);
 
 DROP POLICY IF EXISTS "User views own notifications" ON public.notifications;
 DROP POLICY IF EXISTS "User updates own notifications" ON public.notifications;
 DROP POLICY IF EXISTS "Public full access notifications" ON public.notifications;
 
 ALTER TABLE public.notifications DROP CONSTRAINT IF EXISTS notifications_user_id_fkey;
+ALTER TABLE public.notifications ALTER COLUMN user_id DROP NOT NULL;
 ALTER TABLE public.notifications ALTER COLUMN user_id TYPE TEXT USING user_id::text;
 ALTER TABLE public.notifications ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "Public full access notifications" ON public.notifications FOR ALL TO anon, authenticated USING (true) WITH CHECK (true);
+CREATE POLICY "Public full access notifications" ON public.notifications
+  FOR ALL TO anon, authenticated
+  USING (true)
+  WITH CHECK (true);
 
 
 -- =========================================================
