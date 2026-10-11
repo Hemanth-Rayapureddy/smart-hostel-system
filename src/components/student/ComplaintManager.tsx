@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { StudentProfile, Complaint, ComplaintCategory } from '../../types';
-import { localStore } from '../../lib/supabase';
-import { AlertCircle, Plus, Camera, EyeOff, Image, ArrowUpRight, CheckCircle2 } from 'lucide-react';
+import { localStore, supabaseApi } from '../../lib/supabase';
+import { AlertCircle, Plus, Camera, EyeOff, Image, ArrowUpRight, CheckCircle2, Database } from 'lucide-react';
 import { Badge } from '../common/Badge';
 
 export const ComplaintManager: React.FC = () => {
@@ -19,6 +19,32 @@ export const ComplaintManager: React.FC = () => {
   const [category, setCategory] = useState<ComplaintCategory>('maintenance');
   const [isAnonymous, setIsAnonymous] = useState(false);
   const [photoUrl, setPhotoUrl] = useState('');
+  const [isSaving, setIsSaving] = useState(false);
+
+  // Sync with Supabase complaints table
+  useEffect(() => {
+    async function syncRemote() {
+      if (!student) return;
+      const remote = await supabaseApi.fetchComplaints();
+      if (remote && remote.length > 0) {
+        const myRemote = remote.filter(
+          (c) => c.studentId === student.id || (c.roomNumber === student.roomNumber && c.block === student.hostelBlock)
+        );
+        if (myRemote.length > 0) {
+          setComplaints((prev) => {
+            const ticketMap = new Map(prev.map((p) => [p.ticketNumber, p]));
+            myRemote.forEach((r) => {
+              ticketMap.set(r.ticketNumber, r);
+            });
+            return Array.from(ticketMap.values()).sort(
+              (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+            );
+          });
+        }
+      }
+    }
+    syncRemote();
+  }, [student?.id, student?.roomNumber, student?.hostelBlock]);
 
   if (!student) return null;
 
@@ -34,10 +60,11 @@ export const ComplaintManager: React.FC = () => {
     'other',
   ];
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!title || !description) return;
 
+    setIsSaving(true);
     const ticketNumber = 'CMP-2026-' + Math.floor(100 + Math.random() * 900);
 
     const newComplaint: Complaint = {
@@ -57,10 +84,14 @@ export const ComplaintManager: React.FC = () => {
       updatedAt: new Date().toISOString(),
     };
 
+    // 1. Immediately update localStore for zero latency
     const allComplaints = localStore.getComplaints();
     const updated = [newComplaint, ...allComplaints];
     localStore.setComplaints(updated);
     setComplaints([newComplaint, ...complaints]);
+
+    // 2. Direct INSERT into live Supabase complaints table
+    await supabaseApi.insertComplaint(newComplaint);
 
     // Notify warden
     addNotification(
@@ -72,6 +103,7 @@ export const ComplaintManager: React.FC = () => {
       'complaint'
     );
 
+    setIsSaving(false);
     setShowModal(false);
     setTitle('');
     setDescription('');
@@ -79,8 +111,9 @@ export const ComplaintManager: React.FC = () => {
     setIsAnonymous(false);
   };
 
-  const handleReopen = (complaintId: string) => {
+  const handleReopen = async (complaintId: string) => {
     const allComplaints = localStore.getComplaints();
+    const target = allComplaints.find((c) => c.id === complaintId);
     const updated = allComplaints.map((c) =>
       c.id === complaintId
         ? { ...c, status: 'reopened' as const, updatedAt: new Date().toISOString() }
@@ -90,6 +123,10 @@ export const ComplaintManager: React.FC = () => {
     setComplaints((prev) =>
       prev.map((c) => (c.id === complaintId ? { ...c, status: 'reopened' as const } : c))
     );
+
+    if (target) {
+      await supabaseApi.updateComplaint(target.ticketNumber, { status: 'reopened' });
+    }
   };
 
   return (

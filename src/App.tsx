@@ -36,12 +36,18 @@ import { NoticeCreator } from './components/warden/NoticeCreator';
 import { PollCreator } from './components/warden/PollCreator';
 
 import { X, User, DollarSign, Utensils, Vote, Bell, RotateCcw } from 'lucide-react';
+import { supabaseApi } from './lib/supabase';
 
 const MainAppContent: React.FC = () => {
   const { currentUser, userRole, logout } = useAuth();
   const [activeTab, setActiveTab] = useState<string>('dashboard');
   const [isEmergencyOpen, setIsEmergencyOpen] = useState(false);
   const [showMobileMore, setShowMobileMore] = useState(false);
+
+  // Automatically sync localStore records to Supabase tables on startup
+  React.useEffect(() => {
+    supabaseApi.syncAllLocalToSupabase();
+  }, []);
 
   if (!currentUser) {
     return <LoginForm />;

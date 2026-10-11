@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { LeaveRequest, LeaveStatus } from '../../types';
-import { localStore } from '../../lib/supabase';
+import { localStore, supabaseApi } from '../../lib/supabase';
 import { FileText, CheckCircle2, XCircle, Calendar, User } from 'lucide-react';
 import { Badge } from '../common/Badge';
 
@@ -9,6 +9,22 @@ export const WardenLeaves: React.FC = () => {
   const { addNotification } = useAuth();
   const [leaves, setLeaves] = useState<LeaveRequest[]>(() => localStore.getLeaves());
   const [remarksMap, setRemarksMap] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    async function syncRemote() {
+      const remote = await supabaseApi.fetchLeaves();
+      if (remote && remote.length > 0) {
+        setLeaves((prev) => {
+          const map = new Map(prev.map((l) => [l.id, l]));
+          remote.forEach((l) => map.set(l.id, l));
+          return Array.from(map.values()).sort(
+            (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+          );
+        });
+      }
+    }
+    syncRemote();
+  }, []);
 
   const handleAction = (id: string, newStatus: LeaveStatus) => {
     const wardenRemarks = remarksMap[id] || (newStatus === 'approved' ? 'Approved by Warden office.' : 'Rejected.');
@@ -23,6 +39,9 @@ export const WardenLeaves: React.FC = () => {
 
     localStore.setLeaves(updated);
     setLeaves(updated);
+
+    // Sync to Supabase
+    supabaseApi.updateLeaveStatus(id, newStatus, wardenRemarks);
 
     const target = all.find((l) => l.id === id);
     if (target) {

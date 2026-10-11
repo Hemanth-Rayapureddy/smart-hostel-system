@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { StudentProfile, VisitorRequest } from '../../types';
-import { localStore } from '../../lib/supabase';
+import { localStore, supabaseApi } from '../../lib/supabase';
 import { Users, Plus, Calendar, Clock, CheckCircle } from 'lucide-react';
 import { Badge } from '../common/Badge';
 
@@ -20,9 +20,32 @@ export const VisitorManager: React.FC = () => {
   const [expectedTime, setExpectedTime] = useState('');
   const [purpose, setPurpose] = useState('');
 
+  // Sync with Supabase visitor_requests table
+  useEffect(() => {
+    async function syncRemote() {
+      if (!student) return;
+      const remote = await supabaseApi.fetchVisitors();
+      if (remote && remote.length > 0) {
+        const myVisitors = remote.filter(
+          (v) => v.studentId === student.id || v.studentName === student.fullName
+        );
+        if (myVisitors.length > 0) {
+          setVisitors((prev) => {
+            const map = new Map(prev.map((item) => [item.id, item]));
+            myVisitors.forEach((item) => map.set(item.id, item));
+            return Array.from(map.values()).sort(
+              (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+            );
+          });
+        }
+      }
+    }
+    syncRemote();
+  }, [student?.id, student?.fullName]);
+
   if (!student) return null;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!visitorName || !relationship || !visitDate || !expectedTime || !purpose) return;
 
@@ -44,6 +67,9 @@ export const VisitorManager: React.FC = () => {
     const all = localStore.getVisitors();
     localStore.setVisitors([newReq, ...all]);
     setVisitors([newReq, ...visitors]);
+
+    // Save to Supabase
+    await supabaseApi.insertVisitor(newReq);
 
     addNotification(
       'warden',

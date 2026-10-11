@@ -355,3 +355,241 @@ export const localStore = {
   getEscalationHours: (): number => getStored('escalation_hours', 48),
   setEscalationHours: (hours: number) => setStored('escalation_hours', hours),
 };
+
+// =========================================================
+// LIVE SUPABASE API INTEGRATION LAYER
+// Syncs and persists all records directly into Supabase tables
+// =========================================================
+export const supabaseApi = {
+  // COMPLAINTS
+  async insertComplaint(c: Complaint) {
+    if (!supabase) return { error: 'No live supabase client' };
+    try {
+      const payload = {
+        ticket_number: c.ticketNumber,
+        student_id: c.studentId,
+        student_name: c.studentName,
+        category: c.category,
+        title: c.title,
+        description: c.description,
+        block: c.block,
+        room_number: c.roomNumber,
+        is_anonymous: c.isAnonymous,
+        photo_url: c.photoUrl || null,
+        status: c.status,
+        created_at: c.createdAt,
+      };
+      const { data, error } = await supabase.from('complaints').upsert([payload], { onConflict: 'ticket_number' });
+      return { data, error };
+    } catch (e) {
+      console.warn('Supabase insertComplaint exception:', e);
+      return { error: e };
+    }
+  },
+
+  async fetchComplaints(): Promise<Complaint[]> {
+    if (!supabase) return [];
+    try {
+      const { data, error } = await supabase.from('complaints').select('*').order('created_at', { ascending: false });
+      if (error || !data) return [];
+      return data.map((d: any) => ({
+        id: d.id,
+        ticketNumber: d.ticket_number,
+        studentId: d.student_id || 'unknown',
+        studentName: d.student_name || (d.is_anonymous ? 'Anonymous Student' : 'Resident Student'),
+        category: d.category,
+        title: d.title,
+        description: d.description,
+        block: d.block,
+        roomNumber: d.room_number,
+        isAnonymous: d.is_anonymous,
+        photoUrl: d.photo_url || undefined,
+        status: d.status,
+        assignedTo: d.assigned_to || undefined,
+        createdAt: d.created_at,
+        updatedAt: d.updated_at || d.created_at,
+      }));
+    } catch (e) {
+      console.warn('Supabase fetchComplaints exception:', e);
+      return [];
+    }
+  },
+
+  async updateComplaint(ticketNumber: string, updates: Partial<{ status: string; assignedTo: string; escalatedAt: string }>) {
+    if (!supabase) return;
+    try {
+      const payload: any = { updated_at: new Date().toISOString() };
+      if (updates.status) payload.status = updates.status;
+      if (updates.assignedTo !== undefined) payload.assigned_to = updates.assignedTo;
+      if (updates.escalatedAt) payload.escalated_at = updates.escalatedAt;
+      await supabase.from('complaints').update(payload).eq('ticket_number', ticketNumber);
+    } catch (e) {
+      console.warn('Supabase updateComplaint exception:', e);
+    }
+  },
+
+  // LEAVE REQUESTS
+  async insertLeave(l: LeaveRequest) {
+    if (!supabase) return;
+    try {
+      await supabase.from('leave_requests').insert([{
+        student_id: l.studentId,
+        student_name: l.studentName,
+        block: l.block,
+        room_number: l.roomNumber,
+        start_date: l.startDate,
+        end_date: l.endDate,
+        reason: l.reason,
+        status: l.status,
+        warden_remarks: l.wardenRemarks || null,
+      }]);
+    } catch (e) {
+      console.warn('Supabase insertLeave exception:', e);
+    }
+  },
+
+  async fetchLeaves(): Promise<LeaveRequest[]> {
+    if (!supabase) return [];
+    try {
+      const { data, error } = await supabase.from('leave_requests').select('*').order('created_at', { ascending: false });
+      if (error || !data) return [];
+      return data.map((d: any) => ({
+        id: d.id,
+        studentId: d.student_id,
+        studentName: d.student_name || 'Resident Student',
+        block: d.block || 'Block A',
+        roomNumber: d.room_number || '204',
+        startDate: d.start_date,
+        endDate: d.end_date,
+        reason: d.reason,
+        status: d.status,
+        wardenRemarks: d.warden_remarks || undefined,
+        createdAt: d.created_at,
+      }));
+    } catch (e) {
+      console.warn('Supabase fetchLeaves exception:', e);
+      return [];
+    }
+  },
+
+  async updateLeaveStatus(id: string, status: string, remarks?: string) {
+    if (!supabase) return;
+    try {
+      await supabase.from('leave_requests').update({ status, warden_remarks: remarks || null }).eq('id', id);
+    } catch (e) {
+      console.warn('Supabase updateLeaveStatus exception:', e);
+    }
+  },
+
+  // VISITOR REQUESTS
+  async insertVisitor(v: VisitorRequest) {
+    if (!supabase) return;
+    try {
+      await supabase.from('visitor_requests').insert([{
+        student_id: v.studentId,
+        student_name: v.studentName,
+        block: v.block,
+        room_number: v.roomNumber,
+        visitor_name: v.visitorName,
+        relationship: v.relationship,
+        visit_date: v.visitDate,
+        expected_time: v.expectedTime,
+        purpose: v.purpose,
+        status: v.status,
+        warden_remarks: v.wardenRemarks || null,
+      }]);
+    } catch (e) {
+      console.warn('Supabase insertVisitor exception:', e);
+    }
+  },
+
+  async fetchVisitors(): Promise<VisitorRequest[]> {
+    if (!supabase) return [];
+    try {
+      const { data, error } = await supabase.from('visitor_requests').select('*').order('created_at', { ascending: false });
+      if (error || !data) return [];
+      return data.map((d: any) => ({
+        id: d.id,
+        studentId: d.student_id,
+        studentName: d.student_name || 'Resident Student',
+        block: d.block || 'Block A',
+        roomNumber: d.room_number || '204',
+        visitorName: d.visitor_name,
+        relationship: d.relationship,
+        visitDate: d.visit_date,
+        expectedTime: d.expected_time,
+        purpose: d.purpose,
+        status: d.status,
+        wardenRemarks: d.warden_remarks || undefined,
+        createdAt: d.created_at,
+      }));
+    } catch (e) {
+      console.warn('Supabase fetchVisitors exception:', e);
+      return [];
+    }
+  },
+
+  async updateVisitorStatus(id: string, status: string, remarks?: string) {
+    if (!supabase) return;
+    try {
+      await supabase.from('visitor_requests').update({ status, warden_remarks: remarks || null }).eq('id', id);
+    } catch (e) {
+      console.warn('Supabase updateVisitorStatus exception:', e);
+    }
+  },
+
+  // EMERGENCY ALERTS
+  async insertEmergency(e: EmergencyAlert) {
+    if (!supabase) return;
+    try {
+      await supabase.from('emergency_alerts').insert([{
+        student_id: e.studentId,
+        student_name: e.studentName,
+        type: e.type,
+        block: e.block,
+        room_number: e.roomNumber,
+        status: e.status,
+        notes: e.notes || null,
+      }]);
+    } catch (err) {
+      console.warn('Supabase insertEmergency exception:', err);
+    }
+  },
+
+  async fetchEmergencies(): Promise<EmergencyAlert[]> {
+    if (!supabase) return [];
+    try {
+      const { data, error } = await supabase.from('emergency_alerts').select('*').order('created_at', { ascending: false });
+      if (error || !data) return [];
+      return data.map((d: any) => ({
+        id: d.id,
+        studentId: d.student_id,
+        studentName: d.student_name || 'Resident Student',
+        type: d.type,
+        block: d.block,
+        roomNumber: d.room_number,
+        status: d.status,
+        notes: d.notes || undefined,
+        createdAt: d.created_at,
+        resolvedAt: d.resolved_at || undefined,
+      }));
+    } catch (err) {
+      console.warn('Supabase fetchEmergencies exception:', err);
+      return [];
+    }
+  },
+
+  // AUTO-SYNC ALL LOCAL RECORDS TO SUPABASE
+  async syncAllLocalToSupabase() {
+    if (!supabase) return;
+    try {
+      const localComplaints = localStore.getComplaints();
+      for (const c of localComplaints) {
+        await supabaseApi.insertComplaint(c);
+      }
+    } catch (err) {
+      console.warn('Auto-sync error:', err);
+    }
+  },
+};
+

@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { StudentProfile, LeaveRequest } from '../../types';
-import { localStore } from '../../lib/supabase';
+import { localStore, supabaseApi } from '../../lib/supabase';
 import { FileText, Plus, Calendar, Clock, CheckCircle2, AlertTriangle } from 'lucide-react';
 import { Badge } from '../common/Badge';
 
@@ -18,9 +18,32 @@ export const LeaveManager: React.FC = () => {
   const [endDate, setEndDate] = useState('');
   const [reason, setReason] = useState('');
 
+  // Sync with Supabase leave_requests table
+  useEffect(() => {
+    async function syncRemote() {
+      if (!student) return;
+      const remote = await supabaseApi.fetchLeaves();
+      if (remote && remote.length > 0) {
+        const myLeaves = remote.filter(
+          (l) => l.studentId === student.id || l.studentName === student.fullName
+        );
+        if (myLeaves.length > 0) {
+          setLeaves((prev) => {
+            const map = new Map(prev.map((item) => [item.id, item]));
+            myLeaves.forEach((item) => map.set(item.id, item));
+            return Array.from(map.values()).sort(
+              (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+            );
+          });
+        }
+      }
+    }
+    syncRemote();
+  }, [student?.id, student?.fullName]);
+
   if (!student) return null;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!startDate || !endDate || !reason) return;
 
@@ -41,6 +64,9 @@ export const LeaveManager: React.FC = () => {
     const updated = [newLeave, ...allLeaves];
     localStore.setLeaves(updated);
     setLeaves([newLeave, ...leaves]);
+
+    // Save to Supabase
+    await supabaseApi.insertLeave(newLeave);
 
     // Notify warden of new leave request
     addNotification(

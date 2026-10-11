@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { Complaint, ComplaintStatus, ComplaintCategory } from '../../types';
-import { localStore } from '../../lib/supabase';
+import { localStore, supabaseApi } from '../../lib/supabase';
 import {
   AlertCircle,
   Filter,
@@ -33,6 +33,23 @@ export const WardenComplaints: React.FC = () => {
   const [tempHours, setTempHours] = useState(escalationHours);
   const [scanMessage, setScanMessage] = useState<string | null>(null);
 
+  // Sync with live Supabase complaints table
+  useEffect(() => {
+    async function syncRemote() {
+      const remote = await supabaseApi.fetchComplaints();
+      if (remote && remote.length > 0) {
+        setComplaints((prev) => {
+          const map = new Map(prev.map((c) => [c.ticketNumber, c]));
+          remote.forEach((r) => map.set(r.ticketNumber, r));
+          return Array.from(map.values()).sort(
+            (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+          );
+        });
+      }
+    }
+    syncRemote();
+  }, []);
+
   // Filtered list
   const filtered = complaints.filter((c) => {
     if (statusFilter !== 'all' && c.status !== statusFilter) return false;
@@ -55,6 +72,11 @@ export const WardenComplaints: React.FC = () => {
         const createdMs = new Date(c.createdAt).getTime();
         if (now - createdMs > thresholdMs) {
           escalatedCount++;
+          // Update in Supabase
+          supabaseApi.updateComplaint(c.ticketNumber, {
+            status: 'escalated',
+            escalatedAt: new Date().toISOString(),
+          });
           return {
             ...c,
             status: 'escalated' as ComplaintStatus,
@@ -96,6 +118,8 @@ export const WardenComplaints: React.FC = () => {
     workerName?: string
   ) => {
     const all = localStore.getComplaints();
+    const target = all.find((c) => c.id === complaintId);
+
     const updated = all.map((c) => {
       if (c.id === complaintId) {
         return {
@@ -112,16 +136,23 @@ export const WardenComplaints: React.FC = () => {
     localStore.setComplaints(updated);
     setComplaints(updated);
 
-    const target = all.find((c) => c.id === complaintId);
-    if (target && !target.isAnonymous) {
-      addNotification(
-        target.studentId,
-        `Complaint Ticket Updated: ${target.ticketNumber}`,
-        `Your complaint status has been updated to ${newStatus.toUpperCase()}${
-          workerName ? ` (Assigned to: ${workerName})` : ''
-        }.`,
-        'complaint'
-      );
+    if (target) {
+      // Sync update to Supabase
+      supabaseApi.updateComplaint(target.ticketNumber, {
+        status: newStatus,
+        assignedTo: workerName,
+      });
+
+      if (!target.isAnonymous) {
+        addNotification(
+          target.studentId,
+          `Complaint Ticket Updated: ${target.ticketNumber}`,
+          `Your complaint status has been updated to ${newStatus.toUpperCase()}${
+            workerName ? ` (Assigned to: ${workerName})` : ''
+          }.`,
+          'complaint'
+        );
+      }
     }
   };
 

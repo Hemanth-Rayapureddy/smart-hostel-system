@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { StudentProfile, EmergencyType, EmergencyAlert } from '../../types';
-import { localStore } from '../../lib/supabase';
+import { localStore, supabaseApi } from '../../lib/supabase';
 import { AlertTriangle, ShieldAlert, HeartPulse, Flame, Lock, X } from 'lucide-react';
 
 interface EmergencyModalProps {
@@ -20,7 +20,7 @@ export const EmergencyModal: React.FC<EmergencyModalProps> = ({ isOpen, onClose 
 
   if (!isOpen || !student) return null;
 
-  const handleSendSOS = (e: React.FormEvent) => {
+  const handleSendSOS = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
 
@@ -38,6 +38,9 @@ export const EmergencyModal: React.FC<EmergencyModalProps> = ({ isOpen, onClose 
 
     const all = localStore.getEmergencies();
     localStore.setEmergencies([newAlert, ...all]);
+
+    // Insert into live Supabase emergency_alerts table
+    await supabaseApi.insertEmergency(newAlert);
 
     // Dispatch broadcast alert to warden & emergency users
     addNotification(

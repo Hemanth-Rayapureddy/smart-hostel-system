@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { EmergencyAlert, EmergencyStatus } from '../../types';
-import { localStore } from '../../lib/supabase';
+import { localStore, supabaseApi } from '../../lib/supabase';
 import { ShieldAlert, AlertTriangle, CheckCircle2, Megaphone, Send } from 'lucide-react';
 import { Badge } from '../common/Badge';
 
@@ -12,6 +12,22 @@ export const WardenEmergency: React.FC = () => {
   const [broadcastTarget, setBroadcastTarget] = useState<string>('all');
   const [broadcastMsg, setBroadcastMsg] = useState<string>('');
   const [broadcastSent, setBroadcastSent] = useState(false);
+
+  useEffect(() => {
+    async function syncRemote() {
+      const remote = await supabaseApi.fetchEmergencies();
+      if (remote && remote.length > 0) {
+        setEmergencies((prev) => {
+          const map = new Map(prev.map((e) => [e.id, e]));
+          remote.forEach((e) => map.set(e.id, e));
+          return Array.from(map.values()).sort(
+            (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+          );
+        });
+      }
+    }
+    syncRemote();
+  }, []);
 
   const handleResolveAlert = (alertId: string) => {
     const all = localStore.getEmergencies();
