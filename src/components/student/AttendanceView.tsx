@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { StudentProfile } from '../../types';
-import { localStore } from '../../lib/supabase';
+import { StudentProfile, AttendanceRecord } from '../../types';
+import { localStore, supabaseApi } from '../../lib/supabase';
 import { Calendar, CheckCircle2, Clock, XCircle, AlertCircle } from 'lucide-react';
 import { Badge } from '../common/Badge';
 
@@ -9,13 +9,35 @@ export const AttendanceView: React.FC = () => {
   const { currentUser } = useAuth();
   const student = currentUser as StudentProfile;
 
+  const [records, setRecords] = useState<AttendanceRecord[]>(() =>
+    student ? localStore.getAttendance().filter((a) => a.studentId === student.id) : []
+  );
+
+  useEffect(() => {
+    async function syncRemote() {
+      if (!student) return;
+      const remote = await supabaseApi.fetchAttendance();
+      if (remote && remote.length > 0) {
+        const myRemote = remote.filter(
+          (a) => a.studentId === student.id || a.studentName === student.fullName
+        );
+        if (myRemote.length > 0) {
+          setRecords((prev) => {
+            const map = new Map(prev.map((r) => [r.date, r]));
+            myRemote.forEach((r) => map.set(r.date, r));
+            return Array.from(map.values()).sort(
+              (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+            );
+          });
+        }
+      }
+    }
+    syncRemote();
+  }, [student?.id, student?.fullName]);
+
   if (!student) return null;
 
-  const attendanceRecords = localStore
-    .getAttendance()
-    .filter((a) => a.studentId === student.id)
-    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-
+  const attendanceRecords = records.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
   const totalDays = attendanceRecords.length || 1;
   const presentDays = attendanceRecords.filter((a) => a.status === 'present' || a.status === 'late').length;
   const percentage = Math.round((presentDays / totalDays) * 100);

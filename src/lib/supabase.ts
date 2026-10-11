@@ -579,13 +579,143 @@ export const supabaseApi = {
     }
   },
 
+  // ATTENDANCE
+  async upsertAttendance(a: AttendanceRecord) {
+    if (!supabase) return;
+    try {
+      await supabase.from('attendance').upsert([{
+        student_id: a.studentId,
+        student_name: a.studentName,
+        block: a.block,
+        room_number: a.roomNumber,
+        date: a.date,
+        status: a.status,
+        remarks: a.remarks || null,
+      }], { onConflict: 'student_id,date' });
+    } catch (e) {
+      console.warn('Supabase upsertAttendance error:', e);
+    }
+  },
+
+  async fetchAttendance(): Promise<AttendanceRecord[]> {
+    if (!supabase) return [];
+    try {
+      const { data, error } = await supabase.from('attendance').select('*').order('date', { ascending: false });
+      if (error || !data) return [];
+      return data.map((d: any) => ({
+        id: d.id,
+        studentId: d.student_id,
+        studentName: d.student_name || 'Resident Student',
+        block: d.block || 'Block A',
+        roomNumber: d.room_number || '204',
+        date: d.date,
+        status: d.status,
+        remarks: d.remarks || undefined,
+      }));
+    } catch (e) {
+      console.warn('Supabase fetchAttendance error:', e);
+      return [];
+    }
+  },
+
+  // PROFILES & STUDENTS
+  async upsertProfile(p: UserProfile | StudentProfile) {
+    if (!supabase) return;
+    try {
+      await supabase.from('profiles').upsert([{
+        id: p.id,
+        full_name: p.fullName,
+        email: p.email,
+        role: p.role,
+        phone: p.phone || null,
+      }], { onConflict: 'id' });
+    } catch (e) {
+      console.warn('Supabase upsertProfile error:', e);
+    }
+  },
+
+  async upsertStudent(s: StudentProfile) {
+    if (!supabase) return;
+    try {
+      await supabaseApi.upsertProfile(s);
+      await supabase.from('students').upsert([{
+        id: s.id,
+        student_id_no: s.studentIdNo,
+        department: s.department,
+        year_of_study: s.yearOfStudy,
+        emergency_contact_name: s.emergencyContactName,
+        emergency_contact_phone: s.emergencyContactPhone,
+        hostel_block: s.hostelBlock,
+        room_number: s.roomNumber,
+      }], { onConflict: 'id' });
+    } catch (e) {
+      console.warn('Supabase upsertStudent error:', e);
+    }
+  },
+
+  async fetchStudents(): Promise<StudentProfile[]> {
+    if (!supabase) return [];
+    try {
+      const { data: students, error: sErr } = await supabase.from('students').select('*');
+      const { data: profiles, error: pErr } = await supabase.from('profiles').select('*');
+      if (sErr || pErr || !students || !profiles) return [];
+      const profMap = new Map(profiles.map((p: any) => [p.id, p]));
+      return students.map((s: any) => {
+        const p = profMap.get(s.id) || {};
+        return {
+          id: s.id,
+          fullName: p.full_name || 'Student',
+          email: p.email || '',
+          role: 'student',
+          phone: p.phone || '',
+          studentIdNo: s.student_id_no,
+          department: s.department,
+          yearOfStudy: s.year_of_study,
+          emergencyContactName: s.emergency_contact_name,
+          emergencyContactPhone: s.emergency_contact_phone,
+          hostelBlock: s.hostel_block,
+          roomNumber: s.room_number,
+          createdAt: s.created_at,
+        } as StudentProfile;
+      });
+    } catch (e) {
+      console.warn('Supabase fetchStudents error:', e);
+      return [];
+    }
+  },
+
   // AUTO-SYNC ALL LOCAL RECORDS TO SUPABASE
   async syncAllLocalToSupabase() {
     if (!supabase) return;
     try {
+      // 1. Sync students and profiles
+      const localStudents = localStore.getStudents();
+      for (const st of localStudents) {
+        await supabaseApi.upsertStudent(st);
+      }
+
+      // 2. Sync complaints
       const localComplaints = localStore.getComplaints();
       for (const c of localComplaints) {
         await supabaseApi.insertComplaint(c);
+      }
+
+      // 3. Sync attendance
+      const localAttendance = localStore.getAttendance();
+      for (const a of localAttendance) {
+        await supabaseApi.upsertAttendance(a);
+      }
+
+      // 4. Sync leaves
+      const localLeaves = localStore.getLeaves();
+      for (const l of localLeaves) {
+        await supabaseApi.insertLeave(l);
+      }
+
+      // 5. Sync visitors
+      const localVisitors = localStore.getVisitors();
+      for (const v of localVisitors) {
+        await supabaseApi.insertVisitor(v);
       }
     } catch (err) {
       console.warn('Auto-sync error:', err);

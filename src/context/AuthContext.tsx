@@ -12,7 +12,7 @@ import {
   NotificationItem,
 } from '../types';
 
-import { supabase, localStore } from '../lib/supabase';
+import { supabase, localStore, supabaseApi } from '../lib/supabase';
 import { checkLeaveReturnReminders } from '../lib/notification';
 
 export interface RegisterStudentData {
@@ -392,19 +392,21 @@ export const AuthProvider: React.FC<{
 
         // Initialize attendance record
         const existingAtt = localStore.getAttendance();
-        localStore.setAttendance([
-          {
-            id: 'att_' + Date.now(),
-            studentId: newStudentId,
-            studentName: newStudent.fullName,
-            block: newStudent.hostelBlock,
-            roomNumber: newStudent.roomNumber,
-            date: new Date().toISOString().split('T')[0],
-            status: 'present',
-            markedBy: 'Curfew Desk Verification',
-          },
-          ...existingAtt,
-        ]);
+        const initialAtt: AttendanceRecord = {
+          id: 'att_' + Date.now(),
+          studentId: newStudentId,
+          studentName: newStudent.fullName,
+          block: newStudent.hostelBlock,
+          roomNumber: newStudent.roomNumber,
+          date: new Date().toISOString().split('T')[0],
+          status: 'present',
+          markedBy: 'Curfew Desk Verification',
+        };
+        localStore.setAttendance([initialAtt, ...existingAtt]);
+
+        // Sync directly into live Supabase tables
+        supabaseApi.upsertStudent(newStudent);
+        supabaseApi.upsertAttendance(initialAtt);
 
         setCurrentUser(newStudent);
         setUserRole('student');
@@ -452,6 +454,9 @@ export const AuthProvider: React.FC<{
           { email: trimmedEmail, password, role: 'warden', profileId: newWardenId },
         ];
         localStore.setAuthAccounts(updatedAuth);
+
+        // Sync warden profile to Supabase
+        supabaseApi.upsertProfile(newWarden);
 
         setCurrentUser(newWarden);
         setUserRole('warden');
@@ -574,30 +579,9 @@ export const AuthProvider: React.FC<{
     };
     localStore.setAttendance([newAttendance, ...existingAttendance]);
 
-    // 4. Try syncing into Supabase if online
-    if (supabase) {
-      try {
-        await supabase.from('profiles').insert({
-          id: newStudentId,
-          full_name: newStudent.fullName,
-          email: newStudent.email,
-          role: 'student',
-          phone: newStudent.phone,
-        });
-        await supabase.from('students').insert({
-          id: newStudentId,
-          student_id_no: newStudent.studentIdNo,
-          department: newStudent.department,
-          year_of_study: newStudent.yearOfStudy,
-          emergency_contact_name: newStudent.emergencyContactName,
-          emergency_contact_phone: newStudent.emergencyContactPhone,
-          hostel_block: newStudent.hostelBlock,
-          room_number: newStudent.roomNumber,
-        });
-      } catch (err) {
-        console.warn('Background Supabase sync skipped:', err);
-      }
-    }
+    // 4. Persist directly into live Supabase tables
+    await supabaseApi.upsertStudent(newStudent);
+    await supabaseApi.upsertAttendance(newAttendance);
 
     // 5. Automatically log the student in
     setCurrentUser(newStudent);
@@ -648,20 +632,8 @@ export const AuthProvider: React.FC<{
     ];
     localStore.setAuthAccounts(updatedAuth);
 
-    // Try syncing into Supabase
-    if (supabase) {
-      try {
-        await supabase.from('profiles').insert({
-          id: newWardenId,
-          full_name: newWarden.fullName,
-          email: newWarden.email,
-          role: 'warden',
-          phone: newWarden.phone,
-        });
-      } catch (err) {
-        console.warn('Background Supabase warden sync skipped:', err);
-      }
-    }
+    // Sync warden profile to Supabase
+    await supabaseApi.upsertProfile(newWarden);
 
     // Automatically log warden in
     setCurrentUser(newWarden);
@@ -776,6 +748,9 @@ export const AuthProvider: React.FC<{
         profileId: newId,
       },
     ]);
+
+    // Sync to Supabase
+    supabaseApi.upsertStudent(newStudent);
   };
 
   const updateStudentByWarden = (studentId: string, updatedFields: Partial<StudentProfile>) => {
@@ -783,6 +758,11 @@ export const AuthProvider: React.FC<{
     const updatedList = all.map((s) => (s.id === studentId ? { ...s, ...updatedFields } : s));
     localStore.setStudents(updatedList);
     setAllStudents(updatedList);
+
+    const updated = updatedList.find((s) => s.id === studentId);
+    if (updated) {
+      supabaseApi.upsertStudent(updated);
+    }
 
     if (currentUser && currentUser.id === studentId) {
       setCurrentUser({ ...currentUser, ...updatedFields } as StudentProfile);

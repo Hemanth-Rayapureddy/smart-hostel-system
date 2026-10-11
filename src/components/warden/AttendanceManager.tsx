@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { AttendanceRecord, AttendanceStatus } from '../../types';
-import { localStore } from '../../lib/supabase';
+import { localStore, supabaseApi } from '../../lib/supabase';
 import { Calendar, CheckCircle2, UserCheck, Save } from 'lucide-react';
 import { Badge } from '../common/Badge';
 
@@ -13,6 +13,23 @@ export const AttendanceManager: React.FC = () => {
   const [selectedBlock, setSelectedBlock] = useState('Block A');
   const [isSaved, setIsSaved] = useState(false);
 
+  // Sync attendance with Supabase
+  useEffect(() => {
+    async function syncRemote() {
+      const remote = await supabaseApi.fetchAttendance();
+      if (remote && remote.length > 0) {
+        setRecords((prev) => {
+          const map = new Map(prev.map((r) => [`${r.studentId}_${r.date}`, r]));
+          remote.forEach((r) => map.set(`${r.studentId}_${r.date}`, r));
+          return Array.from(map.values()).sort(
+            (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+          );
+        });
+      }
+    }
+    syncRemote();
+  }, []);
+
   const blockStudents = allStudents.filter((s) => s.hostelBlock === selectedBlock);
 
   const getStudentStatus = (studentId: string): AttendanceStatus => {
@@ -20,18 +37,20 @@ export const AttendanceManager: React.FC = () => {
     return rec?.status || 'present';
   };
 
-  const setStudentStatus = (studentId: string, status: AttendanceStatus) => {
+  const setStudentStatus = async (studentId: string, status: AttendanceStatus) => {
     const student = allStudents.find((s) => s.id === studentId);
     if (!student) return;
 
     const existingIndex = records.findIndex((r) => r.studentId === studentId && r.date === todayStr);
 
     let updated: AttendanceRecord[];
+    let recToSave: AttendanceRecord;
 
     if (existingIndex >= 0) {
-      updated = records.map((r, i) => (i === existingIndex ? { ...r, status } : r));
+      recToSave = { ...records[existingIndex], status };
+      updated = records.map((r, i) => (i === existingIndex ? recToSave : r));
     } else {
-      const newRec: AttendanceRecord = {
+      recToSave = {
         id: 'att_' + Date.now() + Math.random(),
         studentId,
         studentName: student.fullName,
@@ -39,17 +58,23 @@ export const AttendanceManager: React.FC = () => {
         roomNumber: student.roomNumber,
         date: todayStr,
         status,
-        markedBy: 'Warden Dr. K. V. Raman',
+        markedBy: 'Warden Desk',
       };
-      updated = [newRec, ...records];
+      updated = [recToSave, ...records];
     }
 
     setRecords(updated);
     localStore.setAttendance(updated);
+
+    // Save directly to Supabase attendance table
+    await supabaseApi.upsertAttendance(recToSave);
   };
 
-  const handleSaveAll = () => {
+  const handleSaveAll = async () => {
     localStore.setAttendance(records);
+    for (const r of records.filter((rec) => rec.date === todayStr)) {
+      await supabaseApi.upsertAttendance(r);
+    }
     setIsSaved(true);
     setTimeout(() => setIsSaved(false), 3000);
   };
