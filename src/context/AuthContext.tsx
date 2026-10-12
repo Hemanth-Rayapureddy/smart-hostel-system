@@ -10,6 +10,7 @@ import {
   StudentProfile,
   UserRole,
   NotificationItem,
+  AttendanceRecord,
 } from '../types';
 
 import { supabase, localStore, supabaseApi } from '../lib/supabase';
